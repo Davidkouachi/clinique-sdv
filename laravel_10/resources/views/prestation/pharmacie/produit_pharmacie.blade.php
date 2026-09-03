@@ -20,8 +20,8 @@
 @section('content')
 
 <div class="app-body">
-    @include('PRODUITS PHARAMACIE', [
-        'title' => 'LITS',
+    @include('pageTitre', [
+        'title' => 'PRODUITS PHARAMACIE',
         'subtitle' => 'Configurations / Produits de Pharmacie'
     ])
     <div class="row gx-3" >

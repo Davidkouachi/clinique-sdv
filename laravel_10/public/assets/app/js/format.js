@@ -246,6 +246,13 @@ $(document).ready(function () {
         return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
+    window.toNumber = function (value) {
+        return parseInt(
+            String(value ?? '').replace(/\D/g, ''),
+            10
+        ) || 0;
+    }
+
     window.calculateDaysBetween = function (startDate, endDate) {
         const start = new Date(startDate);
         const end = new Date(endDate);
@@ -514,5 +521,267 @@ $(document).ready(function () {
                 .toggleClass('ri-eye-off-line', isPassword);
         });
     }
+
+window.openModal = function ({
+    title = '',
+    content = '',
+    size = 'modal-lg'
+} = {}) {
+
+    let modalElement =
+        document.getElementById('globalModal');
+
+    const previousFocus =
+        document.activeElement;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Créer le modal uniquement s'il n'existe pas
+    |--------------------------------------------------------------------------
+    */
+
+    if (!modalElement) {
+
+        const modalHtml = `
+
+            <div
+                id="globalModal"
+                class="custom-modal"
+                role="dialog"
+                aria-modal="true"
+            >
+
+                <div class="custom-modal-overlay"></div>
+
+                <div class="custom-modal-dialog ${size}">
+
+                    <div class="custom-modal-content">
+
+                        <div class="custom-modal-header">
+
+                            <h5 class="custom-modal-title"></h5>
+
+                            <button
+                                type="button"
+                                class="custom-modal-close"
+                                aria-label="Fermer"
+                            >
+                                &times;
+                            </button>
+
+                        </div>
+
+                        <div class="custom-modal-body"></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+        document.body.insertAdjacentHTML(
+            'beforeend',
+            modalHtml
+        );
+
+        modalElement =
+            document.getElementById('globalModal');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mise à jour du contenu
+    |--------------------------------------------------------------------------
+    */
+
+    const dialog =
+        modalElement.querySelector(
+            '.custom-modal-dialog'
+        );
+
+    const titleElement =
+        modalElement.querySelector(
+            '.custom-modal-title'
+        );
+
+    const bodyElement =
+        modalElement.querySelector(
+            '.custom-modal-body'
+        );
+
+    const closeButton =
+        modalElement.querySelector(
+            '.custom-modal-close'
+        );
+
+    const overlay =
+        modalElement.querySelector(
+            '.custom-modal-overlay'
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Taille
+    |--------------------------------------------------------------------------
+    */
+
+    dialog.className =
+        `custom-modal-dialog ${size}`;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Titre
+    |--------------------------------------------------------------------------
+    */
+
+    titleElement.textContent = title;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Contenu
+    |--------------------------------------------------------------------------
+    */
+
+    bodyElement.innerHTML = content;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Éviter plusieurs événements
+    |--------------------------------------------------------------------------
+    */
+
+    if (!modalElement.dataset.eventsAttached) {
+
+        let isClosing = false;
+
+        const closeModal = function () {
+
+            if (isClosing) {
+                return;
+            }
+
+            isClosing = true;
+
+            if (
+                document.activeElement &&
+                modalElement.contains(
+                    document.activeElement
+                )
+            ) {
+                document.activeElement.blur();
+            }
+
+            modalElement.classList.remove('show');
+
+            document.body.classList.remove(
+                'custom-modal-open'
+            );
+
+            setTimeout(function () {
+
+                isClosing = false;
+
+            }, 200);
+
+        };
+
+
+        closeButton.addEventListener(
+            'click',
+            closeModal
+        );
+
+
+        overlay.addEventListener(
+            'click',
+            closeModal
+        );
+
+
+        const keydownHandler = function (event) {
+
+            if (
+                event.key === 'Escape' &&
+                modalElement.classList.contains('show')
+            ) {
+
+                closeModal();
+
+            }
+
+        };
+
+
+        document.addEventListener(
+            'keydown',
+            keydownHandler
+        );
+
+
+        modalElement.dataset.eventsAttached = 'true';
+
+        modalElement._closeModal = closeModal;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Affichage
+    |--------------------------------------------------------------------------
+    */
+
+    document.body.classList.add(
+        'custom-modal-open'
+    );
+
+
+    requestAnimationFrame(function () {
+
+        modalElement.classList.add('show');
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Focus
+    |--------------------------------------------------------------------------
+    */
+
+    requestAnimationFrame(function () {
+
+        if (closeButton) {
+            closeButton.focus();
+        }
+
+    });
+
+
+    return {
+
+        close: function () {
+
+            if (
+                typeof modalElement._closeModal ===
+                'function'
+            ) {
+
+                modalElement._closeModal();
+
+            }
+
+        },
+
+        element: modalElement
+
+    };
+
+};
 
 });

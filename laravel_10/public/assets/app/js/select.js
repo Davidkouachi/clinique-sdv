@@ -10,22 +10,27 @@ $(document).ready(function () {
         }));
 
         $.ajax({
-            url: window.urlBase + '/api/name_patient_reception',
+            url: window.urlBase + '/api/select/patient',
             method: 'GET',
             dataType: 'json',
             success: function(response) {
-                const data = response.name || [];
+                const data = response.results || [];
 
                 data.forEach(function(item) {
                     place.append(
                         $('<option>', {
-                            value: item.idenregistremetpatient,
-                            text: item.idenregistremetpatient + ' | ' + item.nomprenomspatient
+                            value: item.id,
+                            text: 'ID : ' + item.id + ' | ' + item.nom
                         })
                     );
                 });
             },
             error: function() {
+                console.error(
+                    'Erreur lors du chargement des patients :',
+                    xhr.status,
+                    xhr.responseText
+                );
                 console.error('Erreur lors du chargement des patients');
             }
         });
@@ -52,9 +57,13 @@ $(document).ready(function () {
 
     window.api_select_list_typeacte = function (codeassurance, onSuccess, onError) {
         $.ajax({
-            url: window.urlBase + '/api/select_typeacte/' + codeassurance,
+            url: window.urlBase + '/api/select/typeacte',
             method: 'GET',
             dataType: 'json',
+            data: {
+                typegar: 'CONS',
+                codeassurance: codeassurance
+            },
             success: function (response) {
                 if (typeof onSuccess === 'function') {
                     onSuccess(response);
@@ -233,22 +242,28 @@ $(document).ready(function () {
         }));
 
         $.ajax({
-            url: window.urlBase + '/api/select_list_medecin',
+            url: window.urlBase + '/api/select/medecin',
             method: 'GET',
             dataType: 'json',
             success: function(response) {
-                const data = response.medecin || [];
+                const data = response.results || [];
 
                 data.forEach(function(item) {
                     place.append(
                         $('<option>', {
-                            value: item.codemedecin,
-                            text: item.nomprenomsmed
+                            value: item.code,
+                            text: item.nom
                         })
                     );
                 });
             },
             error: function() {
+
+                console.error(
+                    'Erreur lors du chargement des patients :',
+                    xhr.status,
+                    xhr.responseText
+                );
                 console.error('Erreur lors du chargement de la liste des medecins');
             }
         });

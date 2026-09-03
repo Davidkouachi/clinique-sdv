@@ -46,6 +46,8 @@ use App\Models\porte_caisse;
 class ApisearchController extends Controller
 {
 
+    // rech_patient
+
     public function rech_patient(Request $request)
     {
 
@@ -407,135 +409,6 @@ class ApisearchController extends Controller
             }
 
         }
-
-        // foreach ($examens as $examen) {
-
-        //     $prix = $examen->prix ;
-
-        //     if ($id == 'Y') {
-
-        //         if ($examen->codgaran != null || $examen->codgaran != '') {
-
-        //             $prix = DB::table('tarifs')
-        //                 ->where('tarifs.codgaran', '=', $examen->codgaran)
-        //                 ->where('tarifs.codeassurance', '=', $codeassurance)
-        //                 ->select('tarifs.*')
-        //                 ->first();
-
-        //             if ($periode == 0) {
-        //                 $examen->tarif = $prix->montjour ?? 0;
-        //             } else if ($periode == 1) {
-        //                 $examen->tarif = $prix->montnuit ?? 0;
-        //             } else if ($periode == 2) {
-        //                 $examen->tarif = $prix->montferie ?? 0;
-        //             }
-
-
-        //             $prix_non_as = DB::table('tarifs')
-        //                 ->where('tarifs.codgaran', '=', $examen->codgaran)
-        //                 ->where('tarifs.codeassurance', '=', 'NONAS')
-        //                 ->select('tarifs.*')
-        //                 ->first();
-
-        //             if ($periode == 0) {
-        //                 $examen->tarif_non_as = $prix_non_as->montjour ?? 0;
-        //             } else if ($periode == 1) {
-        //                 $examen->tarif_non_as = $prix_non_as->montnuit ?? 0;
-        //             } else if ($periode == 2) {
-        //                 $examen->tarif_non_as = $prix_non_as->montferie ?? 0;
-        //             }
-
-        //             $examen->valeur = 0;
-        //             $examen->valeur_non_as = 0;
-
-        //         } else {
-
-        //             // $examen->tarif = 0;
-        //             // $examen->valeur = 0;
-
-        //             // $examen->tarif_non_as = 0;
-        //             // $examen->valeur_non_as = 0;
-
-        //             $examen->tarif_non_as = $prix ?? 0;
-        //             $examen->tarif = $prix ?? 0;
-        //             $examen->valeur = $examen->cot ?? 0;
-        //             $examen->valeur_non_as = $examen->cot ?? 0;
-        //         }
-
-        //     } else if ($id == 'Z' || $id == 'B') {
-
-        //         if ($examen->cot == null || $examen->cot == '') {
-        //             $examen->cot = 1;
-        //         }
-
-        //         if ($examen->cot != null || $examen->cot != '') {
-
-        //             $prix = DB::table('tarifs')
-        //                 ->where('tarifs.codgaran', '=', $examen->codfamexam)
-        //                 ->where('tarifs.codeassurance', '=', $codeassurance)
-        //                 ->select('tarifs.*')
-        //                 ->first();
-
-        //             $prix->montj = $examen->cot * $prix->montjour ?? 0;
-        //             $prix->montn = $examen->cot * $prix->montnuit ?? 0;
-        //             $prix->montf = $examen->cot * $prix->montferie ?? 0;
-
-        //             if ($periode == 0) {
-        //                 $examen->tarif = $prix->montj;
-        //                 $examen->valeur = $prix->montjour;
-        //             } else if ($periode == 1) {
-        //                 $examen->tarif = $prix->montn;
-        //                 $examen->valeur = $prix->montnuit;
-        //             } else if ($periode == 2) {
-        //                 $examen->tarif = $prix->montf;
-        //                 $examen->valeur = $prix->montferie;
-        //             }
-
-
-        //             $prix_non_as = DB::table('tarifs')
-        //                 ->where('tarifs.codgaran', '=', $examen->codfamexam)
-        //                 ->where('tarifs.codeassurance', '=', 'NONAS')
-        //                 ->select('tarifs.*')
-        //                 ->first();
-
-        //             $prix_non_as->montj = $examen->cot * $prix_non_as->montjour ?? 0;
-        //             $prix_non_as->montn = $examen->cot * $prix_non_as->montnuit ?? 0;
-        //             $prix_non_as->montf = $examen->cot * $prix_non_as->montferie ?? 0;
-
-        //             if ($periode == 0) {
-        //                 $examen->tarif_non_as = $prix_non_as->montj;
-        //                 $examen->valeur_non_as = $prix_non_as->montjour;
-        //             } else if ($periode == 1) {
-        //                 $examen->tarif_non_as = $prix_non_as->montn;
-        //                 $examen->valeur_non_as = $prix_non_as->montnuit;
-        //             } else if ($periode == 2) {
-        //                 $examen->tarif_non_as = $prix_non_as->montf;
-        //                 $examen->valeur_non_as = $prix_non_as->montferie;
-        //             }
-
-        //         } else {
-
-        //             // $examen->tarif = 0;
-        //             // $examen->valeur = 0;
-
-        //             // $examen->tarif_non_as = 0;
-        //             // $examen->valeur_non_as = 0;
-
-        //             $examen->tarif_non_as = $prix ?? 0;
-        //             $examen->tarif = $prix ?? 0;
-        //             $examen->valeur = $examen->cot ?? 0;
-        //             $examen->valeur_non_as = $examen->cot ?? 0;
-        //         }
-
-        //     } else {
-
-        //         $examen->tarif = 0;
-        //         $examen->valeur = 0;
-        //         $examen->tarif_non_as = 0;
-        //         $examen->valeur_non_as = 0;
-        //     }
-
-        // }
 
         return response()->json(['success' => true, 'examens' => $examens]);
 

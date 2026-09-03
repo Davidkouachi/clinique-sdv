@@ -1,0 +1,383 @@
+/* =========================================================
+   CUSTOM TABLE
+   ========================================================= */
+
+.custom-table-wrapper {
+    width: 100%;
+    position: relative;
+}
+
+
+/* =========================================================
+   TOOLBAR
+   ========================================================= */
+
+.custom-table-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.custom-table-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.custom-table-search input {
+    height: 38px;
+    min-width: 280px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 0 12px;
+    outline: none;
+    font-size: 14px;
+    background: #fff;
+    color: #212529;
+}
+
+.custom-table-search input:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, .10);
+}
+
+.custom-table-btn {
+    height: 38px;
+    border: 1px solid #0d6efd;
+    background: #0d6efd;
+    color: #fff;
+    border-radius: 6px;
+    padding: 0 15px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background .15s ease;
+}
+
+.custom-table-btn:hover {
+    background: #0b5ed7;
+}
+
+
+/* =========================================================
+   TABLE CONTAINER
+   ========================================================= */
+
+.custom-table-container {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    position: relative;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: #fff;
+}
+
+.custom-table thead th {
+    background: #f8f9fa;
+    color: #495057;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    padding: 12px 10px;
+    border-bottom: 1px solid #dee2e6;
+    white-space: nowrap;
+}
+
+.custom-table tbody td {
+    padding: 11px 10px;
+    border-bottom: 1px solid #edf0f2;
+    color: #343a40;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.custom-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.custom-table-empty {
+    text-align: center;
+    padding: 40px 20px !important;
+    color: #6c757d;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.custom-table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.custom-table-info {
+    color: #6c757d;
+    font-size: 13px;
+}
+
+.custom-table-pagination {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.custom-table-page {
+    min-width: 34px;
+    height: 34px;
+    border: 1px solid #dee2e6;
+    background: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background .15s ease;
+}
+
+.custom-table-page:hover:not(:disabled) {
+    background: #f1f3f5;
+}
+
+.custom-table-page.active {
+    background: #0d6efd;
+    color: #fff;
+    border-color: #0d6efd;
+}
+
+.custom-table-page:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.custom-table-loading {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, .75);
+    z-index: 20;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-table-spinner {
+    width: 30px;
+    height: 30px;
+
+    border: 3px solid #dee2e6;
+    border-top-color: #0d6efd;
+
+    border-radius: 50%;
+
+    animation: customTableSpin .7s linear infinite;
+}
+
+@keyframes customTableSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* =========================================================
+   ACTION BUTTON
+   ========================================================= */
+
+.custom-table-actions {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-table-action-btn {
+    width: 34px;
+    height: 34px;
+
+    border: 1px solid #dee2e6;
+    background: #fff;
+    color: #495057;
+
+    border-radius: 5px;
+
+    cursor: pointer;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    font-size: 18px;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        color .15s ease;
+}
+
+.custom-table-action-btn:hover {
+    background: #f8f9fa;
+    border-color: #cfd4da;
+    color: #212529;
+}
+
+
+/* =========================================================
+   ACTION DROPDOWN
+   IMPORTANT :
+   Le menu est maintenant ajouté dans <body>
+   et non dans le tableau.
+   ========================================================= */
+
+.custom-table-action-menu {
+    position: fixed;
+
+    min-width: 190px;
+    max-width: 260px;
+
+    background: #fff;
+
+    border: 1px solid #dee2e6;
+    border-radius: 7px;
+
+    box-shadow: 0 8px 25px rgba(0, 0, 0, .15);
+
+    z-index: 999999;
+
+    display: none;
+
+    padding: 5px 0;
+
+    overflow: hidden;
+
+    /* évite qu'un long texte déborde */
+    white-space: nowrap;
+}
+
+.custom-table-action-menu.show {
+    display: block;
+}
+
+
+/* =========================================================
+   ACTION ITEM
+   ========================================================= */
+
+.custom-table-action-item {
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    width: 100%;
+
+    padding: 9px 13px;
+
+    border: 0;
+
+    background: #fff;
+
+    color: #343a40;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    font-size: 13px;
+
+    line-height: 1.4;
+
+    white-space: nowrap;
+
+    transition: background .15s ease;
+}
+
+.custom-table-action-item:hover {
+    background: #f8f9fa;
+}
+
+.custom-table-action-item i {
+    width: 18px;
+
+    font-size: 15px;
+
+    flex-shrink: 0;
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   COULEURS ACTIONS
+   ========================================================= */
+
+.custom-table-action-item.text-danger {
+    color: #dc3545;
+}
+
+.custom-table-action-item.text-danger:hover {
+    background: #fff5f5;
+}
+
+.custom-table-action-item.text-info {
+    color: #0dcaf0;
+}
+
+.custom-table-action-item.text-primary {
+    color: #0d6efd;
+}
+
+.custom-table-action-item.text-success {
+    color: #198754;
+}
+
+.custom-table-action-item.text-warning {
+    color: #ffc107;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    .custom-table-search {
+        width: 100%;
+    }
+
+    .custom-table-search input {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .custom-table-toolbar {
+        align-items: stretch;
+    }
+
+    .custom-table-search {
+        flex: 1;
+    }
+
+    .custom-table-footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+}

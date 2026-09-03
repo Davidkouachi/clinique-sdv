@@ -17,7 +17,7 @@ use App\Http\Controllers\ApihistoriqueController;
 use App\Http\Controllers\authController;
 use App\Http\Controllers\ApipUdFactureController;
 
-// $prefix = 'amitie/public'  ope_caisse_new getStatFacDay getWeeklyConsultations;
+// $prefix = 'amitie/public'  ope_caisse_new getStatFacDay getWeeklyConsultations historique_caisse fiche_consultation; select_type_examend select_examen montant_prelevement prix_examen
 
 // Route::prefix($prefix)->middleware(['web'])->group(function () {
 Route::middleware(['web'])->group(function () {
@@ -278,8 +278,53 @@ Route::middleware(['web'])->group(function () {
 	Route::get('/etat_prod_utilise', [ApipdfController::class, 'etat_prod_utilise']);
 	// Etat fin
 
+	// Historique debut
+	Route::get('/historique_caisse/{date}', [ApihistoriqueController::class, 'historique_caisse']);
+	// Historique fin
+
 	// UD_facture debut
 	Route::get('/ud_facture/{numfac}', [ApipUdFactureController::class, 'ud_facture_traitement']);
 	// UD_facture fin
 
 });
+
+use App\Http\Controllers\Api\SelectController;
+use App\Http\Controllers\Api\RechController;
+use App\Http\Controllers\Api\ConsultationController;
+use App\Http\Controllers\Api\ExamenController;
+
+// Route::middleware(['web'])->group(function () {
+
+
+	// Select
+	Route::get('/select/patient', [SelectController::class, 'patient']);
+	Route::get('/select/medecin', [SelectController::class, 'medecin']);
+	Route::get('/select/typeacte', [SelectController::class, 'typeacte']);
+	Route::get('/select/typexamen', [SelectController::class, 'typexamen']);
+	Route::get('/select/examen', [SelectController::class, 'examens']);
+
+	// Rech
+	Route::get('/rech/patient', [RechController::class, 'patient']);
+	Route::get('/rech/prelevement', [RechController::class, 'prelevement']);
+
+	// Consultation
+	Route::get('/consultations', [ConsultationController::class, 'listAll']);
+	Route::get('/consultations/detail/{code}', [ConsultationController::class, 'detailComplet']);
+	Route::delete('/consultations/delete/{code}', [ConsultationController::class, 'delete']);
+	Route::post('/consultations/create', [ConsultationController::class, 'create']);
+
+	// Examen
+	Route::get('examens', [ExamenController::class, 'listAll']);
+	Route::get('/examens/garanties', [ExamenController::class, 'garanties']);
+	Route::get('/examens/garantie/detail/{id}', [ExamenController::class, 'garantiePrix']);
+	Route::get('/examens/detail/{code}', [ExamenController::class, 'detailComplet']);
+	Route::delete('/examens/delete/{code}', [ExamenController::class, 'delete']);
+	Route::post('/examens/create', [ExamenController::class, 'create']);
+
+	// Soins
+
+
+	// Hospitalisation
+
+
+// });

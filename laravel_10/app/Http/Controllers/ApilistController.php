@@ -61,7 +61,7 @@ class ApilistController extends Controller
 
 
 
-
+// trace_ouvert_fermer list_cons_all list_examen_all prix_examen
 
 
 
@@ -919,19 +919,8 @@ class ApilistController extends Controller
                 'medecin.nomprenomsmed as medecin',
                 'specialitemed.nomspecialite as specialite'
             )
-            ->orderBy('rdvpatients.created_at', 'desc')
+            ->orderBy('rdvpatients.created_at', 'asc')
             ->get();
-
-        foreach ($rdv as $value) {
-            $horaires = DB::table('programmemedecins')
-                ->join('joursemaines', 'joursemaines.id', '=', 'programmemedecins.jour_id')
-                ->where('programmemedecins.codemedecin', '=', $value->codemedecin)
-                ->where('programmemedecins.statut', '=', 'oui')
-                ->select('programmemedecins.*', 'joursemaines.jour as jour')
-                ->get();
-
-            $value->horaires = $horaires;
-        }
 
         return response()->json([
             'data' => $rdv,

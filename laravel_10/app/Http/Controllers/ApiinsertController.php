@@ -1657,25 +1657,6 @@ class ApiinsertController extends Controller
             $timbre = 0;
             $montant_patient = (int) str_replace('.', '', $request->montantP);
 
-            // $reste_patient = (int) $montant_patient - (int) str_replace('.', '', $request->remise);
-
-            // if ($montant_patient >= 5001 && $montant_patient <= 100000) {
-            //     $timbre += 100;
-            //     $montant_patient += 100;
-            // } elseif ($montant_patient > 100000 && $montant_patient <= 500000) {
-            //     $timbre += 500;
-            //     $montant_patient += 500;
-            // } elseif ($montant_patient > 500000 && $montant_patient <= 1000000) {
-            //     $timbre += 1000;
-            //     $montant_patient += 1000;
-            // } elseif ($montant_patient > 1000000 && $montant_patient <= 5000000) {
-            //     $timbre += 2000;
-            //     $montant_patient += 2000;
-            // } elseif ($montant_patient > 5000000) {
-            //     $timbre += 2000;
-            //     $montant_patient += 2000;
-            // }
-
             if ($montant_patient == 0) {
 
                 $date_regle = now();

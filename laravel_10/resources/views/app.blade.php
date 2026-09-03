@@ -29,9 +29,13 @@
     <script src="{{asset('assets/app/js/messageLoader.js') }}"></script>
     <script src="{{asset('assets/app/js/alert.js')}}"></script>
     <script src="{{asset('assets/app/js/format.js')}}"></script>
+    <script src="{{asset('assets/app/js/ajax/requestWithCsrf.js')}}"></script>
     <script src="{{ asset('assets/app/js/select.js') }}"></script>
     <script src="{{ asset('assets/app/js/script.js') }}"></script>
     <script src="{{ asset('assets/app/js/password.js') }}"></script>
+
+    <link rel="stylesheet" href="{{ asset('assets/app/js/Datatable/custom-table.css') }}">
+    <script src="{{ asset('assets/app/js/Datatable/custom-table.js') }}"></script>
 
     <link href="{{asset('assets/vendor/select2/dist/css/select2.min.css')}}" rel="stylesheet" />
     <script src="{{asset('assets/vendor/select2/dist/js/select2.min.js')}}"></script>
@@ -226,7 +230,7 @@
                             <a href="#!">
                                 <i class="ri-first-aid-kit-fill"></i>
                                 <span class="menu-text">
-                                    <b>Services</b>
+                                    <b>Actes</b>
                                 </span>
                             </a>
                             <ul class="treeview-menu">
