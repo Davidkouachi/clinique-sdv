@@ -38,7 +38,7 @@ class ConsultationController extends Controller
         $this->matriculeService = $matriculeService;
     }
 
-	public function listAll(Request $request) 
+	public function listAll(Request $request)
 	{
 	    /*
 	    |--------------------------------------------------------------------------
@@ -49,12 +49,24 @@ class ConsultationController extends Controller
 	    $date1 = $request->input('date1');
 	    $date2 = $request->input('date2');
 
-	    $page = max( (int) $request->input('page', 1), 1);
+	    $perPage = min(
+	        max(
+	            (int) $request->input('per_page', 15),
+	            1
+	        ),
+	        100
+	    );
 
-	    // On limite volontairement le nombre de lignes
-	    $perPage = min(max( (int) $request->input('per_page', 15), 1), 100);
+	    $search = trim(
+	        $request->input('search', '')
+	    );
 
-	    $search = trim( $request->input('search', '') );
+
+	    /*
+	    |--------------------------------------------------------------------------
+	    | Query
+	    |--------------------------------------------------------------------------
+	    */
 
 	    $query = DB::table('consultation')
 
@@ -73,13 +85,6 @@ class ConsultationController extends Controller
 	        )
 
 	        ->join(
-	            'dossierpatient',
-	            'patient.idenregistremetpatient',
-	            '=',
-	            'dossierpatient.idenregistremetpatient'
-	        )
-
-	        ->join(
 	            'medecin',
 	            'consultation.codemedecin',
 	            '=',
@@ -91,38 +96,20 @@ class ConsultationController extends Controller
 	            'medecin.codespecialitemed',
 	            '=',
 	            'specialitemed.codespecialitemed'
-	        )
-
-	        ->join(
-	            'garantie',
-	            'consultation.codeacte',
-	            '=',
-	            'garantie.codgaran'
-	        )
-
-	        ->where(
-	            'garantie.codtypgar',
-	            'CONS'
-	        )
-
-	        ->where(
-	            'dossierpatient.codetypedossier',
-	            'DC'
 	        );
+
+
+	    /*
+	    |--------------------------------------------------------------------------
+	    | Filtre dates
+	    |--------------------------------------------------------------------------
+	    */
 
 	    if (!empty($date1)) {
 
 	        if (!empty($date2)) {
 
 	            $query->whereBetween(
-	                'consultation.date',
-	                [
-	                    $date1,
-	                    $date2
-	                ]
-	            );
-
-	            $countQuery->whereBetween(
 	                'consultation.date',
 	                [
 	                    $date1,
@@ -137,34 +124,28 @@ class ConsultationController extends Controller
 	                '>=',
 	                $date1
 	            );
-
-	            $countQuery->where(
-	                'consultation.date',
-	                '>=',
-	                $date1
-	            );
-
 	        }
 	    }
+
+
+	    /*
+	    |--------------------------------------------------------------------------
+	    | Recherche
+	    |--------------------------------------------------------------------------
+	    */
 
 	    if ($search !== '') {
 
 	        $query->where(function ($q) use ($search) {
 
-	            $q->where(
-	                'consultation.idconsexterne',
-	                'LIKE',
-	                "%{$search}%"
-	            )
-
-	            ->orWhere(
+	            $q->Where(
 	                'consultation.numfac',
 	                'LIKE',
 	                "%{$search}%"
 	            )
 
 	            ->orWhere(
-	                'dossierpatient.numdossier',
+	                'patient.numdossier',
 	                'LIKE',
 	                "%{$search}%"
 	            )
@@ -176,26 +157,25 @@ class ConsultationController extends Controller
 	            )
 
 	            ->orWhere(
-	                'patient.telpatient',
-	                'LIKE',
-	                "%{$search}%"
-	            )
-
-	            ->orWhere(
 	                'medecin.nomprenomsmed',
 	                'LIKE',
 	                "%{$search}%"
 	            )
 
 	            ->orWhere(
-	                'garantie.libgaran',
+	                'specialitemed.nomspecialite',
 	                'LIKE',
 	                "%{$search}%"
 	            );
-
 	        });
-
 	    }
+
+
+	    /*
+	    |--------------------------------------------------------------------------
+	    | SELECT
+	    |--------------------------------------------------------------------------
+	    */
 
 	    $query->select([
 
@@ -207,9 +187,15 @@ class ConsultationController extends Controller
 
 	        'consultation.numfac',
 
-	        'consultation.regle',
+	        'consultation.partassurance',
 
-	        'dossierpatient.numdossier',
+	        'consultation.ticketmod as partpatient',
+
+	        'consultation.taux',
+
+	        'factures.remise',
+
+	        'patient.numdossier',
 
 	        'patient.nomprenomspatient as nom_patient',
 
@@ -217,40 +203,71 @@ class ConsultationController extends Controller
 
 	        'patient.assure',
 
-	        'medecin.nomprenomsmed as nom_medecin',
+	        'medecin.nomprenomsmed as medecin',
 
-	        'garantie.libgaran as garantie',
+	        'specialitemed.nomspecialite as specialite',
 
 	        'factures.montantregle_pat as montant_regle',
 
 	    ]);
 
 
-	    $query->orderBy('consultation.date', 'desc');
+	    /*
+	    |--------------------------------------------------------------------------
+	    | Pagination Laravel
+	    |--------------------------------------------------------------------------
+	    */
 
-	    $result = $this->paginationService->paginate(
+	    $result = $query
+	        ->orderBy(
+	            'consultation.date',
+	            'desc'
+	        )
+	        ->paginate(
+	            $perPage,
+	            ['*'],
+	            'page',
+	            $request->input('page', 1)
+	        );
 
-	        query: $query,
 
-	        countTable: 'consultation',
+	    /*
+	    |--------------------------------------------------------------------------
+	    | Réponse
+	    |--------------------------------------------------------------------------
+	    */
 
-	        page: $page,
+	    return response()->json([
 
-	        perPage: $perPage,
+	        'success' => true,
 
-	        countColumn: 'consultation.idconsexterne'
-	    );
+	        'data' => $result->items(),
 
-	    return response()->json(
-	        $result
-	    );
+	        'meta' => [
+
+	            'current_page' => $result->currentPage(),
+
+	            'per_page' => $result->perPage(),
+
+	            'total' => $result->total(),
+
+	            'last_page' => $result->lastPage(),
+
+	            'from' => $result->firstItem(),
+
+	            'to' => $result->lastItem(),
+
+	            'has_more_pages' => $result->hasMorePages(),
+
+	        ],
+
+	    ]);
 	}
 
 	public function detailComplet(Request $request, $code)
 	{
         $facture = DB::table('consultation')
             ->join('patient', 'consultation.idenregistremetpatient', '=', 'patient.idenregistremetpatient')
-            ->leftjoin('dossierpatient', 'patient.idenregistremetpatient', '=', 'dossierpatient.idenregistremetpatient')
             ->leftJoin('societeassure', 'consultation.codesocieteassure', '=', 'societeassure.codesocieteassure')
             ->leftJoin('tauxcouvertureassure', 'patient.idtauxcouv', '=', 'tauxcouvertureassure.idtauxcouv')
             ->leftJoin('assurance', 'consultation.codeassurance', '=', 'assurance.codeassurance')
@@ -269,7 +286,7 @@ class ConsultationController extends Controller
                 'consultation.numbon as numbon',
                 'consultation.ticketmod as partpatient',
                 'consultation.partassurance as partassurance',
-                'dossierpatient.numdossier as numdossier',
+                'patient.numdossier as numdossier',
                 'patient.nomprenomspatient as nom_patient',
                 'patient.telpatient as tel_patient',
                 'patient.assure as assure',

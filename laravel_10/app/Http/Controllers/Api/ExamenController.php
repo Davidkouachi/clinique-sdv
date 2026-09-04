@@ -84,18 +84,6 @@ class ExamenController extends Controller
 	            'laboratoires.patient_id',
 	            '=',
 	            'patient.idenregistremetpatient'
-	        )
-
-	        ->join(
-	            'dossierpatient',
-	            'patient.idenregistremetpatient',
-	            '=',
-	            'dossierpatient.idenregistremetpatient'
-	        )
-
-	        ->where(
-	            'dossierpatient.codetypedossier',
-	            'DC'
 	        );
 
 
@@ -144,31 +132,13 @@ class ExamenController extends Controller
 	            )
 
 	            ->orWhere(
-	                'laboratoires.numcode',
-	                'LIKE',
-	                "%{$search}%"
-	            )
-
-	            ->orWhere(
-	                'laboratoires.numhosp',
-	                'LIKE',
-	                "%{$search}%"
-	            )
-
-	            ->orWhere(
 	                'patient.nomprenomspatient',
 	                'LIKE',
 	                "%{$search}%"
 	            )
 
 	            ->orWhere(
-	                'patient.telpatient',
-	                'LIKE',
-	                "%{$search}%"
-	            )
-
-	            ->orWhere(
-	                'dossierpatient.numdossier',
+	                'patient.numdossier',
 	                'LIKE',
 	                "%{$search}%"
 	            );
@@ -216,7 +186,7 @@ class ExamenController extends Controller
 
 	        'laboratoires.created_at',
 
-	        'dossierpatient.numdossier',
+	        'patient.numdossier',
 
 	        'patient.nomprenomspatient as nom_patient',
 
@@ -241,35 +211,50 @@ class ExamenController extends Controller
 	    |--------------------------------------------------------------------------
 	    */
 
-	    $query->orderBy(
-	        'laboratoires.created_at',
-	        'desc'
-	    );
+	    $result = $query
+        ->orderBy(
+            'laboratoires.created_at',
+            'desc'
+        )
+        ->paginate(
+            $perPage,
+            ['*'],
+            'page',
+            $request->input('page', 1)
+        );
 
 
 	    /*
 	    |--------------------------------------------------------------------------
-	    | Pagination
+	    | Réponse
 	    |--------------------------------------------------------------------------
 	    */
 
-	    $result = $this->paginationService->paginate(
+	    return response()->json([
 
-	        query: $query,
+	        'success' => true,
 
-	        countTable: 'laboratoires',
+	        'data' => $result->items(),
 
-	        page: $page,
+	        'meta' => [
 
-	        perPage: $perPage,
+	            'current_page' => $result->currentPage(),
 
-	        countColumn: 'laboratoires.id'
-	    );
+	            'per_page' => $result->perPage(),
 
+	            'total' => $result->total(),
 
-	    return response()->json(
-	        $result
-	    );
+	            'last_page' => $result->lastPage(),
+
+	            'from' => $result->firstItem(),
+
+	            'to' => $result->lastItem(),
+
+	            'has_more_pages' => $result->hasMorePages(),
+
+	        ],
+
+	    ]);
 	}
 
 	public function detailComplet(Request $request, $id)
@@ -315,18 +300,6 @@ class ExamenController extends Controller
 	            'patient.idtauxcouv',
 	            '=',
 	            'tauxcouvertureassure.idtauxcouv'
-	        )
-
-	        ->leftJoin(
-	            'dossierpatient',
-	            'patient.idenregistremetpatient',
-	            '=',
-	            'dossierpatient.idenregistremetpatient'
-	        )
-
-	        ->where(
-	            'dossierpatient.codetypedossier',
-	            'DC'
 	        )
 
 	        ->join(
@@ -388,7 +361,7 @@ class ExamenController extends Controller
 
 	            'patient.matriculeassure as matricule',
 
-	            'dossierpatient.numdossier',
+	            'patient.numdossier',
 
 	            /*
 	            | Assurance
@@ -425,33 +398,6 @@ class ExamenController extends Controller
 	        ])
 
 	        ->first();
-
-
-	    /*
-	    |--------------------------------------------------------------------------
-	    | Dossier du patient
-	    |--------------------------------------------------------------------------
-	    */
-
-	    if ($facture) {
-
-	        $facture->numdossier = DB::table('dossierpatient')
-
-	            ->where(
-	                'idenregistremetpatient',
-	                $facture->patient_id
-	            )
-
-	            ->where(
-	                'codetypedossier',
-	                'DC'
-	            )
-
-	            ->orderByDesc('idenregistremetpatient')
-
-	            ->value('numdossier');
-
-	    }
 
 
 	    /*
@@ -1214,30 +1160,18 @@ class ExamenController extends Controller
 	    |--------------------------------------------------------------------------
 	    */
 
-	    $query->orderBy(
-	        'examen.denomination',
-	        'asc'
-	    );
 
-
-	    /*
-	    |--------------------------------------------------------------------------
-	    | Pagination
-	    |--------------------------------------------------------------------------
-	    */
-
-	    $result = $this->paginationService->paginate(
-
-	        query: $query,
-
-	        countTable: 'examen',
-
-	        page: $page,
-
-	        perPage: $perPage,
-
-	        countColumn: 'examen.numexam'
-	    );
+	    $result = $query
+        ->orderBy(
+            'examen.denomination',
+            'asc'
+        )
+        ->paginate(
+            $perPage,
+            ['*'],
+            'page',
+            $request->input('page', 1)
+        );
 
 
 	    /*
@@ -1246,9 +1180,31 @@ class ExamenController extends Controller
 	    |--------------------------------------------------------------------------
 	    */
 
-	    return response()->json(
-	        $result
-	    );
+	    return response()->json([
+
+	        'success' => true,
+
+	        'data' => $result->items(),
+
+	        'meta' => [
+
+	            'current_page' => $result->currentPage(),
+
+	            'per_page' => $result->perPage(),
+
+	            'total' => $result->total(),
+
+	            'last_page' => $result->lastPage(),
+
+	            'from' => $result->firstItem(),
+
+	            'to' => $result->lastItem(),
+
+	            'has_more_pages' => $result->hasMorePages(),
+
+	        ],
+
+	    ]);
 	}
 
 	public function garantiePrix(Request $request, $id)

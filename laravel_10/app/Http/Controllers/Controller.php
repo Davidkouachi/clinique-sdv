@@ -72,7 +72,7 @@ class Controller
 
     public function soinsam()
     {
-        return view('prestation.soinsam.index');
+        return view('prestation.soinsam.index2');
     }
 
     public function typesoins_new()

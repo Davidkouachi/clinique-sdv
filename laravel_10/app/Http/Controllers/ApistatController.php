@@ -48,7 +48,7 @@ use App\Models\prelevement;
 // use App\Models\historiquecaisse;
 use App\Models\rdvpatient;
 
-// getStatFacDay getWeeklyConsultations
+// getStatFacDay getWeeklyConsultations getWeeklyDashbord
 
 
 class ApistatController extends Controller
@@ -98,7 +98,7 @@ class ApistatController extends Controller
 
         // Montants d'aujourd'hui
         $stat_cons = $getTable('consultation', 'numfac', $today);
-        $stat_exam = $getTable('testlaboimagerie', 'numfacbul', $today);
+        $stat_exam = $getTable('laboratoires', 'numfac', $today);
         $stat_soins = $getTable('soins_medicaux', 'numfac_soins', $today);
         $stat_hosp = $getTable('admission', 'numfachospit', $today);
 
@@ -234,12 +234,11 @@ class ApistatController extends Controller
             ->groupByRaw('DATE(date_soin)')
             ->pluck('total', 'date');
 
-        $examens = DB::table('testlaboimagerie')
-            ->selectRaw('DATE(date) as date, COUNT(*) as total')
-            ->whereBetween('date', [$startOfWeek, $endOfWeek])
-            ->groupByRaw('DATE(date)')
+        $examens = DB::table('laboratoires')
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as total')
+            ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            ->groupByRaw('DATE(created_at)')
             ->pluck('total', 'date');
-
 
         // ==========================================================
         // TOTAL PAR JOUR
@@ -292,8 +291,8 @@ class ApistatController extends Controller
             ->whereBetween('date_soin', [$startOfLastWeek, $endOfLastWeek])
             ->count();
 
-        $lastWeekExamens = DB::table('testlaboimagerie')
-            ->whereBetween('date', [$startOfLastWeek, $endOfLastWeek])
+        $lastWeekExamens = DB::table('laboratoires')
+            ->whereBetween('created_at', [$startOfLastWeek, $endOfLastWeek])
             ->count();
 
 
@@ -363,12 +362,12 @@ class ApistatController extends Controller
     {
         $today = Carbon::today();
 
-        $ida = DB::table('testlaboimagerie')
+        $ida = DB::table('laboratoires')
             ->where('typedemande', '=', 'analyse')
             ->whereDate('date', '=', $today)
             ->count();
 
-        $idi = DB::table('testlaboimagerie')
+        $idi = DB::table('laboratoires')
             ->where('typedemande', '=', 'imagerie')
             ->whereDate('date', '=', $today)
             ->count();
@@ -432,7 +431,7 @@ class ApistatController extends Controller
         }
 
         // 3. Examens
-        $examens = DB::table('testlaboimagerie')->select(
+        $examens = DB::table('laboratoires')->select(
                 DB::raw('MONTH(date) as month'),
                 DB::raw('COUNT(*) as count')
             )
@@ -477,7 +476,7 @@ class ApistatController extends Controller
 
         $consultations = DB::table('consultation')->whereBetween('date', [$startDate, $endDate])->count();
         $hospitalisations = DB::table('admission')->whereBetween('created_at',[$startDate, $endDate])->count();
-        $examens = DB::table('testlaboimagerie')->whereBetween('date', [$startDate, $endDate])->count();
+        $examens = DB::table('laboratoires')->whereBetween('date', [$startDate, $endDate])->count();
         $soinsAmbulatoires = DB::table('soins_medicaux')->whereBetween('date_soin',[$startDate, $endDate])->count();
 
         $nbre_fac = $consultations + $hospitalisations + $examens + $soinsAmbulatoires;
@@ -509,8 +508,8 @@ class ApistatController extends Controller
         ->whereBetween('admission.created_at', [$startDate, $endDate])
         ->first();
 
-        $m_exam = DB::table('testlaboimagerie')
-        ->join('factures', 'factures.numfac', '=', 'testlaboimagerie.numfacbul')
+        $m_exam = DB::table('laboratoires')
+        ->join('factures', 'factures.numfac', '=', 'laboratoires.numfac')
         ->select(DB::raw('
             COALESCE(SUM(REPLACE(factures.montantregle_pat, ".", "") + 0), 0) as total_payer,
             COALESCE(SUM(REPLACE(factures.montantreste_pat, ".", "") + 0), 0) as total_impayer,
@@ -519,7 +518,7 @@ class ApistatController extends Controller
             COALESCE(SUM(REPLACE(factures.montant_pat, ".", "") + 0), 0) as part_patient,
             COALESCE(SUM(REPLACE(factures.remise, ".", "") + 0), 0) as remise
         '))
-        ->whereBetween('testlaboimagerie.date', [$startDate, $endDate])
+        ->whereBetween('laboratoires.date', [$startDate, $endDate])
         ->first();
 
         $m_soinsam = DB::table('soins_medicaux')
@@ -616,10 +615,10 @@ class ApistatController extends Controller
 
             $value = $exam['nom'];
             
-            $examen = DB::table('testlaboimagerie')
-                ->join('factures', 'factures.numfac', '=', 'testlaboimagerie.numfacbul')
-                ->where('testlaboimagerie.typedemande', '=', $value)
-                ->whereBetween('testlaboimagerie.date', [$startDate, $endDate])
+            $examen = DB::table('laboratoires')
+                ->join('factures', 'factures.numfac', '=', 'laboratoires.numfac')
+                ->where('laboratoires.typedemande', '=', $value)
+                ->whereBetween('laboratoires.date', [$startDate, $endDate])
                 ->select(DB::raw('
                     COALESCE(SUM(REPLACE(factures.montanttotal, ".", "") + 0), 0) as part_total,
                     COALESCE(SUM(REPLACE(factures.montant_pat, ".", "") + 0), 0) as part_patient,
@@ -628,7 +627,7 @@ class ApistatController extends Controller
                 '))
                 ->first();
 
-            $nbre = DB::table('testlaboimagerie')
+            $nbre = DB::table('laboratoires')
                 ->where('typedemande', '=', $value)
                 ->whereBetween('date', [$startDate, $endDate])
                 ->count() ?? 0;
@@ -714,7 +713,7 @@ class ApistatController extends Controller
     {
         $nbre_cons = DB::table('consultation')->where('idenregistremetpatient', '=', $id)->count();
         $nbre_hos = DB::table('admission')->where('idenregistremetpatient', '=', $id)->count();
-        $nbre_exam = DB::table('testlaboimagerie')->where('idenregistremetpatient', '=', $id)->count();
+        $nbre_exam = DB::table('laboratoires')->where('idenregistremetpatient', '=', $id)->count();
         $nbre_soinsam = DB::table('soins_medicaux')->where('idenregistremetpatient', '=', $id)->count();
 
         $m_cons = DB::table('consultation')
@@ -748,9 +747,9 @@ class ApistatController extends Controller
         '))
         ->first();
 
-        $m_exam = DB::table('testlaboimagerie')
-        ->join('factures', 'factures.numfac', '=', 'testlaboimagerie.numfacbul')
-        ->where('testlaboimagerie.idenregistremetpatient', '=', $id)
+        $m_exam = DB::table('laboratoires')
+        ->join('factures', 'factures.numfac', '=', 'laboratoires.numfac')
+        ->where('laboratoires.idenregistremetpatient', '=', $id)
         ->select(DB::raw('
             COALESCE(SUM(CASE WHEN factures.montantreste_pat = 0 THEN REPLACE(factures.montant_pat, ".", "") + 0 ELSE 0 END), 0) as total_payer,
             COALESCE(SUM(CASE WHEN factures.montantreste_pat > 0 THEN REPLACE(factures.montant_pat, ".", "") + 0 ELSE 0 END), 0) as total_impayer,
@@ -815,8 +814,8 @@ class ApistatController extends Controller
             ->where('factures.codeassurance', '=', $id)
             ->count();
 
-        $nbre_exam = DB::table('testlaboimagerie')
-            ->join('factures', 'factures.numfac', '=', 'testlaboimagerie.numfacbul')
+        $nbre_exam = DB::table('laboratoires')
+            ->join('factures', 'factures.numfac', '=', 'laboratoires.numfac')
             ->where('factures.codeassurance', '=', $id)
             ->count();
 
@@ -855,8 +854,8 @@ class ApistatController extends Controller
             '))
             ->first();
 
-        $m_exam = DB::table('testlaboimagerie')
-            ->join('factures', 'factures.numfac', '=', 'testlaboimagerie.numfacbul')
+        $m_exam = DB::table('laboratoires')
+            ->join('factures', 'factures.numfac', '=', 'laboratoires.numfac')
             ->where('factures.codeassurance', '=', $id)
             ->select(DB::raw('
                 COALESCE(SUM(CASE WHEN factures.montantreste_pat = 0 THEN REPLACE(factures.montanttotal, ".", "") + 0 ELSE 0 END), 0) as total_payer,
@@ -1080,13 +1079,13 @@ class ApistatController extends Controller
             $monthlyStats['consultation'][$monthName] = $value->montant;
         }
 
-        $examen = DB::table('testlaboimagerie')
-        ->join('factures', 'factures.numfac', '=', 'testlaboimagerie.numfacbul')
+        $examen = DB::table('laboratoires')
+        ->join('factures', 'factures.numfac', '=', 'laboratoires.numfac')
         // ->where('factures.montantreste_pat', '=', 0)
-        ->groupBy(DB::raw('MONTH(testlaboimagerie.date)'))
-        ->whereYear('testlaboimagerie.date', $yearSelect)
+        ->groupBy(DB::raw('MONTH(laboratoires.date)'))
+        ->whereYear('laboratoires.date', $yearSelect)
         ->select(
-            DB::raw('MONTH(testlaboimagerie.date) as month'),
+            DB::raw('MONTH(laboratoires.date) as month'),
             DB::raw('COALESCE(SUM(REPLACE(factures.montantregle_pat, ".", "") + 0), 0) as montant')
         )
         ->get();
@@ -1226,7 +1225,7 @@ class ApistatController extends Controller
 
         // Montants d'aujourd'hui
         $cons_today = $getMontant('consultation', 'numfac', $today);
-        $exam_today = $getMontant('testlaboimagerie', 'numfacbul', $today);
+        $exam_today = $getMontant('laboratoires', 'numfac', $today);
         $soins_today = $getMontant('soins_medicaux', 'numfac_soins', $today);
         $hosp_today = $getMontant('admission', 'numfachospit', $today);
 

@@ -1004,7 +1004,7 @@ $(document).ready(function() {
         perPage: 15,
 
         searchPlaceholder:
-            'N° consultation, dossier, patient, médecin...',
+            'N° dossier, patient, médecin...',
 
         searchButtonText:
             'Rechercher',
@@ -1041,12 +1041,6 @@ $(document).ready(function() {
 
 
             {
-                label: 'N° Consultation',
-                data: 'idconsexterne'
-            },
-
-
-            {
                 label: 'N° dossier',
                 data: 'numdossier',
 
@@ -1068,18 +1062,18 @@ $(document).ready(function() {
 
             {
                 label: 'Médecin consultant',
-                data: 'nom_medecin'
+                data: 'medecin'
             },
 
 
             {
-                label: 'Motif',
-                data: 'garantie'
+                label: 'Spécialité',
+                data: 'specialite'
             },
 
 
             {
-                label: 'Prix',
+                label: 'Montant',
                 data: 'montant',
 
                 render: function (value) {
@@ -1087,6 +1081,66 @@ $(document).ready(function() {
                     return `
                         <strong>
                             ${formatPriceT(value)} Fcfa
+                        </strong>
+                    `;
+
+                }
+            },
+
+            {
+                label: 'Remise',
+                data: 'remise',
+
+                render: function (value) {
+
+                    return `
+                        <strong>
+                            ${formatPriceT(value)} Fcfa
+                        </strong>
+                    `;
+
+                }
+            },
+
+            {
+                label: 'Part assurance',
+                data: 'partassurance',
+
+                render: function (value) {
+
+                    return `
+                        <strong>
+                            ${formatPriceT(value)} Fcfa
+                        </strong>
+                    `;
+
+                }
+            },
+
+            {
+                label: 'Part patient',
+                data: 'partpatient',
+
+                render: function (value) {
+
+                    return `
+                        <strong>
+                            ${formatPriceT(value)} Fcfa
+                        </strong>
+                    `;
+
+                }
+            },
+
+            {
+                label: 'Taux',
+                data: 'taux',
+
+                render: function (value) {
+
+                    return `
+                        <strong>
+                            ${parseInt(value ?? 0)} %
                         </strong>
                     `;
 

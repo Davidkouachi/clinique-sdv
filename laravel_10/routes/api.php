@@ -17,7 +17,7 @@ use App\Http\Controllers\ApihistoriqueController;
 use App\Http\Controllers\authController;
 use App\Http\Controllers\ApipUdFactureController;
 
-// $prefix = 'amitie/public'  ope_caisse_new getStatFacDay getWeeklyConsultations historique_caisse fiche_consultation; select_type_examend select_examen montant_prelevement prix_examen
+// $prefix = 'amitie/public'  ope_caisse_new getStatFacDay getWeeklyConsultations historique_caisse fiche_consultation; select_type_examend select_examen montant_prelevement prix_examen select_typesoins select_soinsIn delete_Soinsam
 
 // Route::prefix($prefix)->middleware(['web'])->group(function () {
 Route::middleware(['web'])->group(function () {
@@ -292,6 +292,7 @@ use App\Http\Controllers\Api\SelectController;
 use App\Http\Controllers\Api\RechController;
 use App\Http\Controllers\Api\ConsultationController;
 use App\Http\Controllers\Api\ExamenController;
+use App\Http\Controllers\Api\SoinsController;
 
 // Route::middleware(['web'])->group(function () {
 
@@ -302,6 +303,9 @@ use App\Http\Controllers\Api\ExamenController;
 	Route::get('/select/typeacte', [SelectController::class, 'typeacte']);
 	Route::get('/select/typexamen', [SelectController::class, 'typexamen']);
 	Route::get('/select/examen', [SelectController::class, 'examens']);
+	Route::get('/select/typesoins', [SelectController::class, 'typesoins']);
+	Route::get('/select/produits', [SelectController::class, 'produits']);
+	Route::get('/select/soinsinfirmier/{id}', [SelectController::class, 'soinsinfirmier']);
 
 	// Rech
 	Route::get('/rech/patient', [RechController::class, 'patient']);
@@ -322,7 +326,10 @@ use App\Http\Controllers\Api\ExamenController;
 	Route::post('/examens/create', [ExamenController::class, 'create']);
 
 	// Soins
-
+	Route::get('/soins', [SoinsController::class, 'listAll']);
+	Route::get('/soins/detail/{code}', [SoinsController::class, 'detailComplet']);
+	Route::delete('/soins/delete/{code}', [SoinsController::class, 'delete']);
+	Route::post('/soins/create', [SoinsController::class, 'create']);
 
 	// Hospitalisation
 

@@ -61,7 +61,7 @@ class ApilistController extends Controller
 
 
 
-// trace_ouvert_fermer list_cons_all list_examen_all prix_examen
+// trace_ouvert_fermer list_cons_all list_examen_all prix_examen list_soinsam_all
 
 
 

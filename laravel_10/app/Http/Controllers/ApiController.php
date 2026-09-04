@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\DB;
 // use App\Models\taux;
 // use App\Models\societe;
 // use App\Models\user;
-// use App\Models\role; prix_examen
+// use App\Models\role; prix_examen select_typesoins select_produit select_soinsIn
 
 class ApiController extends Controller
 {

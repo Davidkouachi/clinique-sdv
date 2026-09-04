@@ -222,31 +222,35 @@
                                     CHOIX DES EXAMENS
                                     ====================================================== --}}
                                     <div id="div_Examen" class="mb-3 p-2" style="display: none;">
-                                        <div class="card-header">
-                                            <h5 class="card-title text-center">
-                                                Examens à faire
-                                            </h5>
-                                        </div>
                                         <div class="row gx-3 justify-content-center align-items-center">
                                             <div class="col-12">
-                                                {{-- =================================================
-                                                BOUTON AJOUT EXAMEN
-                                                ================================================== --}}
-                                                
-                                                {{-- =================================================
-                                                CONTENEUR DES BLOCS EXAMENS
-                                                ================================================== --}}
-                                                <div class="row gx-3" id="contenu_examen">
-                                                </div>
-
-                                                <div class="row gx-3 justify-content-center">
-                                                    <div class="col-12 mb-3 text-center">
-                                                        <button type="button" id="add_select_examen" class="btn btn-info">
-                                                            <i class="ri-sticky-note-add-line"></i>
-                                                            Ajouter un Examen
-                                                        </button>
+                                                <div class="mt-2">
+                                                    <div class="card border">
+                                                        <div class="card-header">
+                                                            <h5 class="card-title text-center mb-1">
+                                                                <i class="ri-capsule-line me-1"></i>
+                                                                Examens
+                                                            </h5>
+                                                            <p class="text-muted text-center small mb-0">
+                                                                Examens à réaliser
+                                                            </p>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <div class="row gx-3" id="contenu_examen">
+                                                            </div>
+                                                            <div class="row gx-3 justify-content-center">
+                                                                <div class="col-12 mb-3 text-center">
+                                                                    <button type="button" id="add_select_examen" class="btn btn-outline-info">
+                                                                        <i class="ri-add-line"></i>
+                                                                        Ajouter un Examen
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
+
+
                                                 {{-- =================================================
                                                 TOTALS
                                                 ================================================== --}}
@@ -515,188 +519,255 @@ let examenTable = new CustomTable({
 
     onAction: function (action, row) {
 
-if (action === 'detailEx') {
+        if (action === 'detailEx') {
 
-    const code = row.numexam;
+            const code = row.numexam;
 
-    window.openModal({
+            window.openModal({
 
-        title: 'Détails Examen',
+                title: 'Détails Examen',
 
-        content: `
-            <div class="text-center py-4">
+                content: `
+                    <div class="text-center py-4">
 
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">
-                        Chargement...
-                    </span>
-                </div>
-
-                <div class="mt-3 text-muted">
-                    Chargement des tarifs...
-                </div>
-
-            </div>
-        `,
-
-        size: 'modal-lg'
-
-    });
-
-    fetch(
-        $('#url').attr('content') +
-        `/api/examens/garantie/detail/${encodeURIComponent(code)}`
-    )
-
-        .then(response => {
-
-            if (!response.ok) {
-
-                throw new Error(
-                    `Erreur HTTP ${response.status}`
-                );
-
-            }
-
-            return response.json();
-
-        })
-
-        .then(data => {
-
-            const details = data.prix ?? [];
-
-            const modalBody =
-                document.querySelector(
-                    '#globalModal .custom-modal-body'
-                );
-
-            if (!modalBody) {
-                return;
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Aucun tarif
-            |--------------------------------------------------------------------------
-            */
-
-            if (details.length === 0) {
-
-                modalBody.innerHTML = `
-
-                    <div class="text-center py-5">
-
-                        <i class="ri-information-line fs-1 text-muted"></i>
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">
+                                Chargement...
+                            </span>
+                        </div>
 
                         <div class="mt-3 text-muted">
-                            Aucun tarif disponible pour cet examen.
+                            Chargement des tarifs...
                         </div>
 
                     </div>
+                `,
 
-                `;
+                size: 'modal-lg'
 
-                return;
-            }
+            });
 
-            /*
-            |--------------------------------------------------------------------------
-            | Génération des tarifs
-            |--------------------------------------------------------------------------
-            */
+            fetch(
+                $('#url').attr('content') +
+                `/api/examens/garantie/detail/${encodeURIComponent(code)}`
+            )
 
-            const prixHTML = details.map(function (item) {
+                .then(response => {
 
-                const assurance =
-                    item.codeassurance === 'NONAS'
-                        ? 'Patient non assuré'
-                        : item.assurance ?? 'Assurance inconnue';
+                    if (!response.ok) {
 
-                const headerClass =
-                    item.codeassurance === 'NONAS'
-                        ? 'bg-success'
-                        : 'bg-primary';
+                        throw new Error(
+                            `Erreur HTTP ${response.status}`
+                        );
 
-                return `
+                    }
 
-                    <div class="col-12">
+                    return response.json();
 
-                        <div class="card border mb-3">
+                })
 
-                            <div class="card-header ${headerClass} text-white">
+                .then(data => {
 
-                                <div class="d-flex align-items-center">
+                    const details = data.prix ?? [];
 
-                                    <i class="ri-shield-check-line me-2"></i>
+                    const modalBody =
+                        document.querySelector(
+                            '#globalModal .custom-modal-body'
+                        );
 
-                                    <strong>
+                    if (!modalBody) {
+                        return;
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Aucun tarif
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (details.length === 0) {
+
+                        modalBody.innerHTML = `
+
+                            <div class="text-center py-5">
+
+                                <i class="ri-information-line fs-1 text-muted"></i>
+
+                                <div class="mt-3 text-muted">
+                                    Aucun tarif disponible pour cet examen.
+                                </div>
+
+                            </div>
+
+                        `;
+
+                        return;
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Génération des tarifs
+                    |--------------------------------------------------------------------------
+                    */
+
+                    const prixHTML = details.map(function (item) {
+
+                        const assurance =
+                            item.codeassurance === 'NONAS'
+                                ? 'Patient non assuré'
+                                : item.assurance ?? 'Assurance inconnue';
+
+                        const headerClass =
+                            item.codeassurance === 'NONAS'
+                                ? 'bg-success'
+                                : 'bg-primary';
+
+                        return `
+
+                            <div class="col-12">
+
+                                <div class="card border mb-3">
+
+                                    <div class="card-header ${headerClass} text-white">
+
+                                        <div class="d-flex align-items-center">
+
+                                            <i class="ri-shield-check-line me-2"></i>
+
+                                            <strong>
+                                                ${examenTable.escape(
+                                                    assurance
+                                                )}
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="card-body">
+
+                                        <div class="row g-3">
+
+                                            <div class="col-md-4">
+
+                                                <div class="border rounded p-3 text-center">
+
+                                                    <div class="text-muted small mb-1">
+                                                        Montant Jour
+                                                    </div>
+
+                                                    <strong>
+                                                        ${formatPriceT(
+                                                            item.montjour ?? 0
+                                                        )}
+                                                        Fcfa
+                                                    </strong>
+
+                                                </div>
+
+                                            </div>
+
+                                            <div class="col-md-4">
+
+                                                <div class="border rounded p-3 text-center">
+
+                                                    <div class="text-muted small mb-1">
+                                                        Montant Nuit
+                                                    </div>
+
+                                                    <strong>
+                                                        ${formatPriceT(
+                                                            item.montnuit ?? 0
+                                                        )}
+                                                        Fcfa
+                                                    </strong>
+
+                                                </div>
+
+                                            </div>
+
+                                            <div class="col-md-4">
+
+                                                <div class="border rounded p-3 text-center">
+
+                                                    <div class="text-muted small mb-1">
+                                                        Montant Férié
+                                                    </div>
+
+                                                    <strong>
+                                                        ${formatPriceT(
+                                                            item.montferie ?? 0
+                                                        )}
+                                                        Fcfa
+                                                    </strong>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        `;
+
+                    }).join('');
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Contenu final
+                    |--------------------------------------------------------------------------
+                    */
+
+                    modalBody.innerHTML = `
+
+                        <div class="row gx-3">
+
+                            <div class="col-12">
+
+                                <div class="text-center mb-4">
+
+                                    <img
+                                        src="{{ asset('assets/images/tarif.png') }}"
+                                        class="img-7x rounded-circle mb-3 border border-3"
+                                        alt="Tarif"
+                                    >
+
+                                    <div class="fw-semibold">
                                         ${examenTable.escape(
-                                            assurance
+                                            row.denomination ?? ''
                                         )}
-                                    </strong>
+                                    </div>
+
+                                    <div class="small text-muted">
+                                        ${examenTable.escape(
+                                            row.numexam ?? ''
+                                        )}
+                                    </div>
 
                                 </div>
 
                             </div>
 
-                            <div class="card-body">
+                            ${prixHTML}
 
-                                <div class="row g-3">
+                            <div class="col-12 mt-2">
 
-                                    <div class="col-md-4">
+                                <div class="alert alert-warning d-flex align-items-start gap-2 mb-0">
 
-                                        <div class="border rounded p-3 text-center">
+                                    <i class="ri-information-line fs-5"></i>
 
-                                            <div class="text-muted small mb-1">
-                                                Montant Jour
-                                            </div>
+                                    <div>
 
-                                            <strong>
-                                                ${formatPriceT(
-                                                    item.montjour ?? 0
-                                                )}
-                                                Fcfa
-                                            </strong>
+                                        <strong>NOTE</strong>
 
-                                        </div>
-
-                                    </div>
-
-                                    <div class="col-md-4">
-
-                                        <div class="border rounded p-3 text-center">
-
-                                            <div class="text-muted small mb-1">
-                                                Montant Nuit
-                                            </div>
-
-                                            <strong>
-                                                ${formatPriceT(
-                                                    item.montnuit ?? 0
-                                                )}
-                                                Fcfa
-                                            </strong>
-
-                                        </div>
-
-                                    </div>
-
-                                    <div class="col-md-4">
-
-                                        <div class="border rounded p-3 text-center">
-
-                                            <div class="text-muted small mb-1">
-                                                Montant Férié
-                                            </div>
-
-                                            <strong>
-                                                ${formatPriceT(
-                                                    item.montferie ?? 0
-                                                )}
-                                                Fcfa
-                                            </strong>
-
+                                        <div class="small mt-1">
+                                            Les tarifs affichés sont présentés
+                                            à titre récapitulatif.
                                         </div>
 
                                     </div>
@@ -707,110 +778,43 @@ if (action === 'detailEx') {
 
                         </div>
 
-                    </div>
+                    `;
 
-                `;
+                })
 
-            }).join('');
+                .catch(error => {
 
-            /*
-            |--------------------------------------------------------------------------
-            | Contenu final
-            |--------------------------------------------------------------------------
-            */
+                    console.error(
+                        'Erreur lors du chargement des tarifs :',
+                        error
+                    );
 
-            modalBody.innerHTML = `
+                    const modalBody =
+                        document.querySelector(
+                            '#globalModal .custom-modal-body'
+                        );
 
-                <div class="row gx-3">
+                    if (!modalBody) {
+                        return;
+                    }
 
-                    <div class="col-12">
+                    modalBody.innerHTML = `
 
-                        <div class="text-center mb-4">
+                        <div class="text-center py-5">
 
-                            <img
-                                src="{{ asset('assets/images/tarif.png') }}"
-                                class="img-7x rounded-circle mb-3 border border-3"
-                                alt="Tarif"
-                            >
+                            <i class="ri-error-warning-line fs-1 text-danger"></i>
 
-                            <div class="fw-semibold">
-                                ${examenTable.escape(
-                                    row.denomination ?? ''
-                                )}
-                            </div>
-
-                            <div class="small text-muted">
-                                ${examenTable.escape(
-                                    row.numexam ?? ''
-                                )}
+                            <div class="mt-3 text-danger">
+                                Impossible de charger les tarifs.
                             </div>
 
                         </div>
 
-                    </div>
+                    `;
 
-                    ${prixHTML}
+                });
 
-                    <div class="col-12 mt-2">
-
-                        <div class="alert alert-warning d-flex align-items-start gap-2 mb-0">
-
-                            <i class="ri-information-line fs-5"></i>
-
-                            <div>
-
-                                <strong>NOTE</strong>
-
-                                <div class="small mt-1">
-                                    Les tarifs affichés sont présentés
-                                    à titre récapitulatif.
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            `;
-
-        })
-
-        .catch(error => {
-
-            console.error(
-                'Erreur lors du chargement des tarifs :',
-                error
-            );
-
-            const modalBody =
-                document.querySelector(
-                    '#globalModal .custom-modal-body'
-                );
-
-            if (!modalBody) {
-                return;
-            }
-
-            modalBody.innerHTML = `
-
-                <div class="text-center py-5">
-
-                    <i class="ri-error-warning-line fs-1 text-danger"></i>
-
-                    <div class="mt-3 text-danger">
-                        Impossible de charger les tarifs.
-                    </div>
-
-                </div>
-
-            `;
-
-        });
-
-}
+        }
 
     }
 
@@ -911,9 +915,9 @@ let examendTable = new CustomTable({
             render: function (value) {
 
                 return `
-                    <span class="badge bg-primary">
+                    <strong class="text-primary">
                         ${value ?? 0}
-                    </span>
+                    </strong>
                 `;
 
             }
@@ -1086,14 +1090,15 @@ let examendTable = new CustomTable({
                                 <th>Type</th>
                                 <th>Examen</th>
                                 <th>Montant</th>
-                                <th>Assuré ?</th>
+                                <th>Prélevement</th>
+                                <th>Prise en charge ?</th>
                             </tr>
                         </thead>
 
                         <tbody>
                             <tr>
                                 <td
-                                    colspan="4"
+                                    colspan="5"
                                     class="text-center py-4"
                                 >
                                     <div class="spinner-border text-warning me-2"
@@ -1161,7 +1166,7 @@ let examendTable = new CustomTable({
                             <tr>
 
                                 <td
-                                    colspan="4"
+                                    colspan="5"
                                     class="text-center text-muted py-4"
                                 >
 
@@ -1184,6 +1189,11 @@ let examendTable = new CustomTable({
                             const montant =
                                 parseFloat(
                                     examen.montant ?? 0
+                                );
+
+                            const prelevement =
+                                parseFloat(
+                                    examen.prelevement ?? 0
                                 );
 
                             const assure =
@@ -1220,19 +1230,27 @@ let examendTable = new CustomTable({
 
                                     <td class="text-start">
 
+                                        <strong>
+                                            ${formatPriceT(prelevement)}
+                                            Fcfa
+                                        </strong>
+
+                                    </td>
+
+                                    <td class="text-start">
                                         ${
                                             assure
 
                                                 ? `
-                                                    <span class="text-success">
+                                                    <strong class="text-success">
                                                         Oui
-                                                    </span>
+                                                    </strong>
                                                 `
 
                                                 : `
-                                                    <span class="text-secondary">
+                                                    <strong class="text-danger">
                                                         Non
-                                                    </span>
+                                                    </strong>
                                                 `
                                         }
 
@@ -1251,7 +1269,7 @@ let examendTable = new CustomTable({
 
                             <tr>
 
-                                <td colspan="4">
+                                <td colspan="5">
 
                                     <div class="alert alert-warning d-flex align-items-start gap-2 mb-0">
 
@@ -1298,7 +1316,7 @@ let examendTable = new CustomTable({
                             <tr>
 
                                 <td
-                                    colspan="4"
+                                    colspan="5"
                                     class="text-center text-danger py-4"
                                 >
 

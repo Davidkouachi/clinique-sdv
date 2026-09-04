@@ -46,7 +46,7 @@ use App\Models\porte_caisse;
 class ApisearchController extends Controller
 {
 
-    // rech_patient
+    // rech_patient select_soinsIn
 
     public function rech_patient(Request $request)
     {

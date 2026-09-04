@@ -34,11 +34,11 @@ class SelectController extends Controller
     {
         $query = DB::table('patient')
             ->select(
-                'patient.idenregistremetpatient as id',
-                'patient.nomprenomspatient as nom'
+                'idenregistremetpatient as id',
+                'nomprenomspatient as nom'
             )
             ->orderBy(
-                'patient.nomprenomspatient',
+                'nomprenomspatient',
                 'asc'
             );
 
@@ -48,10 +48,7 @@ class SelectController extends Controller
          */
         if (!empty($request->id)) {
 
-            $query->where(
-                'patient.idenregistremetpatient',
-                $request->id
-            );
+            $query->where('patient.idenregistremetpatient', $request->id );
         }
 
 
@@ -60,20 +57,7 @@ class SelectController extends Controller
          */
         if (!empty($request->typedossier)) {
 
-            $query->whereExists(function ($subQuery) use ($request) {
-
-                $subQuery->select(DB::raw(1))
-                    ->from('dossierpatient')
-                    ->whereColumn(
-                        'dossierpatient.idenregistremetpatient',
-                        'patient.idenregistremetpatient'
-                    )
-                    ->where(
-                        'dossierpatient.codetypdossier',
-                        $request->typedossier
-                    );
-
-            });
+            $query->where( 'numdossier', $request->typedossier);
         }
 
 
@@ -378,6 +362,37 @@ class SelectController extends Controller
         return response()->json([
             'results' => $examens
         ]);
+    }
+
+    public function typesoins()
+    {
+        $typesoins = DB::table('typesoinsinfirmiers')
+            ->select('typesoinsinfirmiers.*')
+            ->orderBy('libelle_typesoins', 'asc')
+            ->get();
+
+        return response()->json(['results' => $typesoins]);
+    }
+
+    public function produits()
+    {
+        $produit = DB::table('medicine')
+            ->select('medicine_id','name','price','status')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        return response()->json(['results' => $produit]);
+    }
+
+    public function soinsinfirmier($id)
+    {
+        $soinsin = DB::table('soins_infirmier')
+            ->where('code_typesoins', '=', $id)
+            ->select('soins_infirmier.*')
+            ->orderBy('libelle_soins', 'asc')
+            ->get();
+
+        return response()->json(['results' => $soinsin]); 
     }
 
 }

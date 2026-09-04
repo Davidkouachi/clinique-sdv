@@ -2,54 +2,54 @@ $(document).ready(function () {
 
     window.requestWithCsrf = function (method, url, data = {}, options = {}) {
 
-        return $.ajax({
+        // return $.ajax({
 
-            url:
-                $('#url').attr('content') +
-                '/refresh-csrf',
+        //     url:
+        //         $('#url').attr('content') +
+        //         '/refresh-csrf',
 
-            type: 'GET',
+        //     type: 'GET',
 
-            dataType: 'json'
+        //     dataType: 'json'
 
-        }).then(function (csrfResponse) {
+        // }).then(function (csrfResponse) {
 
-            const csrfToken =
-                csrfResponse.csrf_token;
+        //     const csrfToken =
+        //         csrfResponse.csrf_token;
 
-            if (!csrfToken) {
+        //     if (!csrfToken) {
 
-                return $.Deferred()
-                    .reject({
-                        status: 419,
-                        responseText:
-                            'Token CSRF invalide.'
-                    })
-                    .promise();
-            }
+        //         return $.Deferred()
+        //             .reject({
+        //                 status: 419,
+        //                 responseText:
+        //                     'Token CSRF invalide.'
+        //             })
+        //             .promise();
+        //     }
 
-            /*
-             * Mise à jour du token
-             */
-            $('meta[name="csrf-token"]')
-                .attr(
-                    'content',
-                    csrfToken
-                );
+        //     /*
+        //      * Mise à jour du token
+        //      */
+        //     $('meta[name="csrf-token"]')
+        //         .attr(
+        //             'content',
+        //             csrfToken
+        //         );
 
-            /*
-             * Requête réelle
-             */
+        //     /*
+        //      * Requête réelle
+        //      */
             return $.ajax({
 
                 url: url,
 
                 type: method,
 
-                headers: {
-                    'X-CSRF-TOKEN':
-                        csrfToken
-                },
+                // headers: {
+                //     'X-CSRF-TOKEN':
+                //         csrfToken
+                // },
 
                 data: data,
 
@@ -62,7 +62,7 @@ $(document).ready(function () {
                 ...options
 
             });
-        });
+        // });
     }
 
 });
