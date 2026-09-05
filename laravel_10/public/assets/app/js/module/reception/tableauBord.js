@@ -44,6 +44,9 @@ $(document).ready(function() {
                     overflowY: 'hidden'
                 });
 
+            // 🔝 Remettre le scroll du body tout en haut
+            $('html, body').scrollTop(0);
+
             $btn
                 .removeClass('btn-primary')
                 .addClass('btn-danger')
@@ -78,10 +81,6 @@ $(document).ready(function() {
 
     OffClick('#btn_refresh_statActivity', function () {
         Activity_cons();
-    });
-
-    OffClick('#btn_refresh_rdv_day', function () {
-        rdv_day();
     });
 
     OffClick('#btn_search_trace_bj', function () {
@@ -422,7 +421,7 @@ $(document).ready(function() {
 
         $.ajax({
 
-            url: $('#url').attr('content') + '/api/verf_caisse',
+            url: $('#url').attr('content') + '/api/caisse/verification',
 
             method: 'GET',
 
@@ -497,11 +496,15 @@ $(document).ready(function() {
 
         $.ajax({
 
-            url: $('#url').attr('content') + '/api/caisse_ouvert',
+            url: $('#url').attr('content') + '/api/caisse/ouverture',
 
             method: 'GET',
 
             dataType: 'json',
+
+            data:{
+                login: window.user.login
+            },
 
             success: function(response) {
 
@@ -582,11 +585,15 @@ $(document).ready(function() {
 
         $.ajax({
 
-            url: $('#url').attr('content') + '/api/caisse_fermer',
+            url: $('#url').attr('content') + '/api/caisse/fermeture',
 
             method: 'GET',
 
             dataType: 'json',
+
+            data:{
+                login: window.user.login
+            },
 
             success: function(response) {
 
@@ -663,6 +670,273 @@ $(document).ready(function() {
 
     //-------------------------------------------------------------------
 
+    function rdv_day() {
+
+        const $page = $('#contenu_rdv');
+
+        const loader = `
+            <div class="d-flex flex-column justify-content-center align-items-center h-100">
+
+                <div class="spinner-border text-success mb-2"
+                     role="status"
+                     aria-hidden="true">
+                </div>
+
+                <small class="text-muted">
+                    Chargement des rendez-vous...
+                </small>
+
+            </div>
+        `;
+
+        $page.html(loader);
+
+        $.ajax({
+
+            url: $('#url').attr('content') + '/api/list_rdv_day',
+
+            method: 'GET',
+
+            dataType: 'json',
+
+            success: function(data) {
+
+                const rdv = data.data || [];
+
+                $page.empty();
+
+                /* ================================================
+                   AUCUN RENDEZ-VOUS
+                   ================================================= */
+
+                if (!rdv.length) {
+
+                    $page.html(`
+                        <div class="rdv-empty">
+
+                            <div class="rdv-empty-icon">
+                                <i class="ri-calendar-check-line"></i>
+                            </div>
+
+                            <div class="fw-semibold text-dark">
+                                Aucun rendez-vous aujourd'hui
+                            </div>
+
+                            <small>
+                                Votre planning est libre pour le moment.
+                            </small>
+
+                        </div>
+                    `);
+
+                    return;
+                }
+
+
+                /* ================================================
+                   TIMELINE
+                   ================================================= */
+
+                const $timeline = $(`
+                    <div class="rdv-timeline w-100"></div>
+                `);
+
+
+                $.each(rdv, function(index, item) {
+
+                    /* ============================================
+                       HEURE
+                       ============================================ */
+
+                    let heure = '--:--';
+
+                    if (item.date) {
+
+                        const date = new Date(
+                            item.date.replace(' ', 'T')
+                        );
+
+                        if (!isNaN(date)) {
+
+                            heure = date.toLocaleTimeString(
+                                'fr-FR',
+                                {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                }
+                            );
+
+                        }
+
+                    }
+
+
+                    /* ============================================
+                       INFORMATIONS
+                       ============================================ */
+
+                    const patient = item.patient
+                        || 'Patient non renseigné';
+
+                    const telephone = item.tel
+                        || item.patient_tel
+                        || 'Non renseigné';
+
+                    const medecin = item.medecin
+                        ? `Dr. ${item.medecin}`
+                        : 'Médecin non renseigné';
+
+                    const specialite = item.specialite
+                        || 'Spécialité non renseignée';
+
+                    const motif = item.motif
+                        || 'Motif non renseigné';
+
+
+                    /* ============================================
+                       ITEM
+                       ============================================ */
+
+                    const $item = $(`
+                        <div class="rdv-item">
+
+                            <!-- HEURE -->
+                            <div class="rdv-time">
+                                ${heure}
+                            </div>
+
+
+                            <!-- POINT -->
+                            <div class="rdv-marker-wrapper">
+
+                                <div class="rdv-marker"></div>
+
+                            </div>
+
+
+                            <!-- CONTENU -->
+                            <div class="rdv-content">
+
+                                <!-- PATIENT -->
+                                <div class="rdv-patient">
+
+                                    <div class="rdv-patient-icon">
+                                        <i class="ri-user-line"></i>
+                                    </div>
+
+                                    <span>
+                                        ${patient}
+                                    </span>
+
+                                </div>
+
+
+                                <!-- MOTIF -->
+                                <div class="mt-2">
+
+                                    <div class="text-muted small mb-1">
+                                        Motif
+                                    </div>
+
+                                    <div class="fw-semibold text-dark small">
+
+                                        <i class="ri-chat-quote-line text-primary me-1"></i>
+
+                                        ${motif}
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- INFORMATIONS -->
+                                <div class="rdv-info mt-2">
+
+                                    <span class="rdv-info-item">
+
+                                        <i class="ri-stethoscope-line"></i>
+
+                                        ${medecin}
+
+                                    </span>
+
+
+                                    <span class="rdv-info-item">
+
+                                        <i class="ri-phone-line"></i>
+
+                                        <span class="rdv-phone">
+                                            ${telephone}
+                                        </span>
+
+                                    </span>
+
+                                </div>
+
+
+                                <!-- SPECIALITE -->
+                                <div>
+
+                                    <span class="rdv-specialite">
+
+                                        <i class="ri-hospital-line me-1"></i>
+
+                                        ${specialite}
+
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    `);
+
+
+                    $timeline.append($item);
+
+                });
+
+
+                $page.append($timeline);
+
+            },
+
+
+            error: function(xhr) {
+
+                console.error(
+                    'Erreur lors du chargement des rendez-vous :',
+                    xhr
+                );
+
+                $page.html(`
+
+                    <div class="rdv-empty">
+
+                        <div class="rdv-empty-icon text-danger bg-danger-subtle">
+
+                            <i class="ri-error-warning-line"></i>
+
+                        </div>
+
+                        <div class="fw-semibold text-danger">
+                            Impossible de charger les rendez-vous
+                        </div>
+
+                        <small>
+                            Veuillez réessayer.
+                        </small>
+
+                    </div>
+
+                `);
+
+            }
+
+        });
+    }
+
     function Statistique() {
         const nbre_fac = $('#nbre_fac');
         const montant_fac_r = $('#montant_fac_r');
@@ -675,7 +949,7 @@ $(document).ready(function() {
         const stat_hosp = $('#stat_hosp');
 
         $.ajax({
-            url: $('#url').attr('content') +'/api/statistique_reception/' + $('#stat_bord_date').val(),
+            url: $('#url').attr('content') +'/api/statistique/dashbordNbre/' + $('#stat_bord_date').val(),
             method: 'GET',
             success: function(response) {
                 hidePreloader();
@@ -711,7 +985,7 @@ $(document).ready(function() {
         $('#div_btn_affiche_stat, #div_btn_cache_stat').hide();
 
         $.ajax({
-            url: $('#url').attr('content') +`/api/statistique_reception_cons/${date1}/${date2}`,
+            url: $('#url').attr('content') +`/api/statistique/consultationNbre/${date1}/${date2}`,
             method: 'GET',
             dataType: 'json',
             success: function(data) {
@@ -983,7 +1257,7 @@ $(document).ready(function() {
 
         $.ajax({
 
-            url: $('#url').attr('content') + '/api/getWeeklyDashbord',
+            url: $('#url').attr('content') + '/api/statistique/dashbordNbreWeekend',
 
             method: 'GET',
 
@@ -1487,7 +1761,7 @@ $(document).ready(function() {
         `);
 
         $.ajax({
-            url: $('#url').attr('content') +'/api/getStatFacDay',
+            url: $('#url').attr('content') +'/api/statistique/dashbordSoldeDay',
             method: 'GET',
             dataType: 'json',
             success: function(data) {
@@ -1615,273 +1889,6 @@ $(document).ready(function() {
         });
     }
 
-    function rdv_day() {
-
-        const $page = $('#contenu_rdv');
-
-        const loader = `
-            <div class="d-flex flex-column justify-content-center align-items-center h-100">
-
-                <div class="spinner-border text-success mb-2"
-                     role="status"
-                     aria-hidden="true">
-                </div>
-
-                <small class="text-muted">
-                    Chargement des rendez-vous...
-                </small>
-
-            </div>
-        `;
-
-        $page.html(loader);
-
-        $.ajax({
-
-            url: $('#url').attr('content') + '/api/list_rdv_day',
-
-            method: 'GET',
-
-            dataType: 'json',
-
-            success: function(data) {
-
-                const rdv = data.data || [];
-
-                $page.empty();
-
-                /* ================================================
-                   AUCUN RENDEZ-VOUS
-                   ================================================= */
-
-                if (!rdv.length) {
-
-                    $page.html(`
-                        <div class="rdv-empty">
-
-                            <div class="rdv-empty-icon">
-                                <i class="ri-calendar-check-line"></i>
-                            </div>
-
-                            <div class="fw-semibold text-dark">
-                                Aucun rendez-vous aujourd'hui
-                            </div>
-
-                            <small>
-                                Votre planning est libre pour le moment.
-                            </small>
-
-                        </div>
-                    `);
-
-                    return;
-                }
-
-
-                /* ================================================
-                   TIMELINE
-                   ================================================= */
-
-                const $timeline = $(`
-                    <div class="rdv-timeline w-100"></div>
-                `);
-
-
-                $.each(rdv, function(index, item) {
-
-                    /* ============================================
-                       HEURE
-                       ============================================ */
-
-                    let heure = '--:--';
-
-                    if (item.date) {
-
-                        const date = new Date(
-                            item.date.replace(' ', 'T')
-                        );
-
-                        if (!isNaN(date)) {
-
-                            heure = date.toLocaleTimeString(
-                                'fr-FR',
-                                {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                }
-                            );
-
-                        }
-
-                    }
-
-
-                    /* ============================================
-                       INFORMATIONS
-                       ============================================ */
-
-                    const patient = item.patient
-                        || 'Patient non renseigné';
-
-                    const telephone = item.tel
-                        || item.patient_tel
-                        || 'Non renseigné';
-
-                    const medecin = item.medecin
-                        ? `Dr. ${item.medecin}`
-                        : 'Médecin non renseigné';
-
-                    const specialite = item.specialite
-                        || 'Spécialité non renseignée';
-
-                    const motif = item.motif
-                        || 'Motif non renseigné';
-
-
-                    /* ============================================
-                       ITEM
-                       ============================================ */
-
-                    const $item = $(`
-                        <div class="rdv-item">
-
-                            <!-- HEURE -->
-                            <div class="rdv-time">
-                                ${heure}
-                            </div>
-
-
-                            <!-- POINT -->
-                            <div class="rdv-marker-wrapper">
-
-                                <div class="rdv-marker"></div>
-
-                            </div>
-
-
-                            <!-- CONTENU -->
-                            <div class="rdv-content">
-
-                                <!-- PATIENT -->
-                                <div class="rdv-patient">
-
-                                    <div class="rdv-patient-icon">
-                                        <i class="ri-user-line"></i>
-                                    </div>
-
-                                    <span>
-                                        ${patient}
-                                    </span>
-
-                                </div>
-
-
-                                <!-- MOTIF -->
-                                <div class="mt-2">
-
-                                    <div class="text-muted small mb-1">
-                                        Motif
-                                    </div>
-
-                                    <div class="fw-semibold text-dark small">
-
-                                        <i class="ri-chat-quote-line text-primary me-1"></i>
-
-                                        ${motif}
-
-                                    </div>
-
-                                </div>
-
-
-                                <!-- INFORMATIONS -->
-                                <div class="rdv-info mt-2">
-
-                                    <span class="rdv-info-item">
-
-                                        <i class="ri-stethoscope-line"></i>
-
-                                        ${medecin}
-
-                                    </span>
-
-
-                                    <span class="rdv-info-item">
-
-                                        <i class="ri-phone-line"></i>
-
-                                        <span class="rdv-phone">
-                                            ${telephone}
-                                        </span>
-
-                                    </span>
-
-                                </div>
-
-
-                                <!-- SPECIALITE -->
-                                <div>
-
-                                    <span class="rdv-specialite">
-
-                                        <i class="ri-hospital-line me-1"></i>
-
-                                        ${specialite}
-
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-                    `);
-
-
-                    $timeline.append($item);
-
-                });
-
-
-                $page.append($timeline);
-
-            },
-
-
-            error: function(xhr) {
-
-                console.error(
-                    'Erreur lors du chargement des rendez-vous :',
-                    xhr
-                );
-
-                $page.html(`
-
-                    <div class="rdv-empty">
-
-                        <div class="rdv-empty-icon text-danger bg-danger-subtle">
-
-                            <i class="ri-error-warning-line"></i>
-
-                        </div>
-
-                        <div class="fw-semibold text-danger">
-                            Impossible de charger les rendez-vous
-                        </div>
-
-                        <small>
-                            Veuillez réessayer.
-                        </small>
-
-                    </div>
-
-                `);
-
-            }
-
-        });
-    }
-
     function historique_journal() {
 
         const $contenu = $('#historique_contenu');
@@ -1918,7 +1925,7 @@ $(document).ready(function() {
 
         $.ajax({
 
-            url: `/api/historique_caisse/${date}`,
+            url: `/api/statistique/dashbordHisCaisse/${date}`,
 
             method: 'GET',
 
@@ -1956,7 +1963,7 @@ $(document).ready(function() {
                 if (traces.length === 0) {
 
                     $contenu.html(`
-                        <div class="d-flex flex-column align-items-center justify-content-center py-5">
+                        <div class="d-flex flex-column align-items-center justify-content-center w-100 py-5">
 
                             <div
                                 class="rounded-circle bg-light d-flex align-items-center justify-content-center mb-3"

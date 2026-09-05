@@ -435,6 +435,10 @@ class ExamenController extends Controller
 
 	                'montant',
 
+	                'part_assurance',
+
+	                'part_patient',
+
 	                'prelevement',
 
 	                'assurance',
@@ -729,6 +733,18 @@ class ExamenController extends Controller
 	                $value['montant'] ?? 0
 	            );
 
+	            $montantPatient = (int) str_replace(
+	                '.',
+	                '',
+	                $value['montant_patient'] ?? 0
+	            );
+
+	            $montantAssurance = (int) str_replace(
+	                '.',
+	                '',
+	                $value['montant_assurance'] ?? 0
+	            );
+
 	            /*
 	             * Si le prélèvement est envoyé au niveau
 	             * de chaque examen.
@@ -765,6 +781,12 @@ class ExamenController extends Controller
 
 	                    'montant' =>
 	                        $montant,
+
+	                    'part_assurance' =>
+	                        $montantAssurance,
+
+	                    'part_patient' =>
+	                        $montantPatient,
 
 	                    'prelevement' =>
 	                        $prelevement,

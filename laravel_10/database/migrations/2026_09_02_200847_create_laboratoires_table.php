@@ -60,6 +60,9 @@ return new class extends Migration
             $table->decimal('valeur', 15, 2)->default(0);
             $table->decimal('montant', 15, 2)->default(0);
 
+            $table->decimal('part_assurance', 15, 2)->default(0);
+            $table->decimal('part_patient', 15, 2)->default(0);
+
             $table->decimal('prelevement', 15, 2)->default(0);
 
             $table->boolean('assurance')->default(false);

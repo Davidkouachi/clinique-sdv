@@ -269,6 +269,85 @@
                             </div>
                         </div>
                     </div>
+<!-- Raccourcis -->
+<div class="dashboard-section-title mt-4">
+    <div class="dashboard-section-icon shortcut">
+        <i class="ri-flashlight-line"></i>
+    </div>
+    <div>
+        <h6 class="mb-0">
+            Accès rapides
+        </h6>
+        <small>
+            Accéder rapidement aux principales fonctionnalités
+        </small>
+    </div>
+</div>
+
+<div class="row g-3">
+
+    <!-- Nouveau patient -->
+    <div class="col-xxl-2 col-xl-2 col-lg-2 col-md-3 col-sm-4 col-6">
+        <a id="btn_nouveau_patient"
+           class="btn btn-info w-100 h-100 py-2"
+           role="button">
+            <i class="ri-user-add-line fs-4 d-block"></i>
+            <span>Nouveau patient</span>
+        </a>
+    </div>
+
+    <!-- Consultation -->
+    <div class="col-xxl-2 col-xl-2 col-lg-2 col-md-3 col-sm-4 col-6">
+        <a id="btn_consultation"
+           class="btn btn-info w-100 h-100 py-2"
+           role="button">
+            <i class="ri-stethoscope-line fs-4 d-block"></i>
+            <span>Consultation</span>
+        </a>
+    </div>
+
+    <!-- Examen -->
+    <div class="col-xxl-2 col-xl-2 col-lg-2 col-md-3 col-sm-4 col-6">
+        <a id="btn_examen"
+           class="btn btn-info w-100 h-100 py-2"
+           role="button">
+            <i class="ri-microscope-line fs-4 d-block"></i>
+            <span>Examen</span>
+        </a>
+    </div>
+
+    <!-- Soins -->
+    <div class="col-xxl-2 col-xl-2 col-lg-2 col-md-3 col-sm-4 col-6">
+        <a id="btn_soins"
+           class="btn btn-info w-100 h-100 py-2"
+           role="button">
+            <i class="ri-heart-pulse-line fs-4 d-block"></i>
+            <span>Soins ambulatoires</span>
+        </a>
+    </div>
+
+    <!-- Hospitalisation -->
+    <div class="col-xxl-2 col-xl-2 col-lg-2 col-md-3 col-sm-4 col-6">
+        <a id="btn_hospitalisation"
+           class="btn btn-info w-100 h-100 py-2"
+           role="button">
+            <i class="ri-hospital-line fs-4 d-block"></i>
+            <span>Hospitalisation</span>
+        </a>
+    </div>
+
+    <!-- Dossier médical -->
+    <div class="col-xxl-2 col-xl-2 col-lg-2 col-md-3 col-sm-4 col-6">
+        <a id="btn_dossier_medical"
+           class="btn btn-info w-100 h-100 py-2"
+           role="button">
+            <i class="ri-folder-user-line fs-4 d-block"></i>
+            <span>Dossiers médicaux</span>
+        </a>
+    </div>
+
+</div>
+
                 </div>
             </div>
         </div>

@@ -17,7 +17,7 @@ use App\Http\Controllers\ApihistoriqueController;
 use App\Http\Controllers\authController;
 use App\Http\Controllers\ApipUdFactureController;
 
-// $prefix = 'amitie/public'  ope_caisse_new getStatFacDay getWeeklyConsultations historique_caisse fiche_consultation; select_type_examend select_examen montant_prelevement prix_examen select_typesoins select_soinsIn delete_Soinsam
+// $prefix = 'amitie/public'  ope_caisse_new getStatFacDay getWeeklyConsultations historique_caisse fiche_consultation; select_type_examend select_examen montant_prelevement prix_examen select_typesoins select_soinsIn delete_Soinsam statistique_reception getWeeklyDashbord historique_caisse verf_caisse caisse_ouvert
 
 // Route::prefix($prefix)->middleware(['web'])->group(function () {
 Route::middleware(['web'])->group(function () {
@@ -293,6 +293,8 @@ use App\Http\Controllers\Api\RechController;
 use App\Http\Controllers\Api\ConsultationController;
 use App\Http\Controllers\Api\ExamenController;
 use App\Http\Controllers\Api\SoinsController;
+use App\Http\Controllers\Api\StatistiqueController;
+use App\Http\Controllers\Api\CaisseController;
 
 // Route::middleware(['web'])->group(function () {
 
@@ -333,5 +335,21 @@ use App\Http\Controllers\Api\SoinsController;
 
 	// Hospitalisation
 
+
+	// Statistique
+
+		// Tableau de bord
+		Route::get('/statistique/dashbordNbre/{date}', [StatistiqueController::class, 'dashbordNbre']);
+		Route::get('/statistique/dashbordNbreWeekend', [StatistiqueController::class, 'dashbordNbreWeekend']);
+		Route::get('/statistique/dashbordSoldeDay', [StatistiqueController::class, 'dashbordSoldeDay']);
+		Route::get('/statistique/dashbordHisCaisse/{date}', [StatistiqueController::class, 'dashbordHisCaisse']);
+
+		// Nombre
+		Route::get('/statistique/consultationNbre/{date1}/{date2}', [StatistiqueController::class, 'consultationNbre']);
+
+	// Caisse
+	Route::get('/caisse/verification', [CaisseController::class, 'verification']);	
+	Route::get('/caisse/ouverture', [CaisseController::class, 'ouverture']);
+	Route::get('/caisse/fermeture', [CaisseController::class, 'fermeture']);	
 
 // });

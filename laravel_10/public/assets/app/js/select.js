@@ -38,7 +38,7 @@ $(document).ready(function () {
 
     window.api_rech_dossier = function (id_patient, onSuccess, onError) {
         $.ajax({
-            url: window.urlBase + '/api/rech_patient',
+            url: window.urlBase + '/api/rech/patient',
             type: 'GET',
             data: { id: id_patient },
             dataType: 'json',

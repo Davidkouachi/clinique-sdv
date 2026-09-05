@@ -43,6 +43,8 @@ use App\Models\programmemedecin;
 use App\Models\user;
 use App\Models\porte_caisse;
 
+// verf_caisse caisse_ouvert
+
 class ApisearchController extends Controller
 {
 

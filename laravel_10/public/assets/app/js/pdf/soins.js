@@ -148,7 +148,7 @@ $(document).ready(function () {
 
             doc.autoTable({
                 startY: yPossT,
-                head: [['N°', 'Soins', 'Prix Unitaire', 'quantité', 'total', 'prise en charge ?']],
+                head: [['N°', 'Soins', 'Prix Unitaire', 'quantité', 'total', 'part assurance', 'part patient', 'prise en charge ?']],
                 body: donneeTables.map((item, index) => [
 
                     index + 1,
@@ -166,6 +166,14 @@ $(document).ready(function () {
                             (parseInt(item.qte) || 0)
                         ) + " Fcfa",
 
+                    item.part_assurance != null
+                        ? formatPriceT(item.part_assurance) + " Fcfa"
+                        : 0,
+
+                    item.part_patient != null
+                        ? formatPriceT(item.part_patient) + " Fcfa"
+                        : 0,
+
                     item.assure === true
                         ? "Oui"
                         : "Non"
@@ -176,7 +184,7 @@ $(document).ready(function () {
                     { content: formatPriceT(totalGeneralSoins) + " Fcfa", styles: { fontStyle: 'bold' } },
                 ]],
 
-                ...configTable([235, 99, 37])
+                ...configTable([235, 99, 37],7)
             });
 
 
@@ -203,7 +211,7 @@ $(document).ready(function () {
 
                 doc.autoTable({
                     startY: yPossT,
-                    head: [['N°', 'Produit utilisé', 'Prix Unitaire', 'Quantité', 'Total', 'Prise en charge ?']],
+                    head: [['N°', 'Produit utilisé', 'Prix Unitaire', 'Quantité', 'Total', 'Part assurance', 'Part patient', 'Prise en charge ?']],
                     body: donneeTable.map((item, index) => [
 
                     index + 1,
@@ -221,6 +229,14 @@ $(document).ready(function () {
                             (parseInt(item.qte) || 0)
                         ) + " Fcfa",
 
+                    item.part_assurance != null
+                        ? formatPriceT(item.part_assurance) + " Fcfa"
+                        : 0,
+
+                    item.part_patient != null
+                        ? formatPriceT(item.part_patient) + " Fcfa"
+                        : 0,
+
                     item.assure === true
                         ? "Oui"
                         : "Non"
@@ -231,7 +247,7 @@ $(document).ready(function () {
                         { content: formatPriceT(totalGeneralProduit) + " Fcfa", styles: { fontStyle: 'bold' } },
                     ]],
 
-                    ...configTable([235, 99, 37])
+                    ...configTable([235, 99, 37], 7)
                 });
             }
 

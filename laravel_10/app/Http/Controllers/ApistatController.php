@@ -48,7 +48,7 @@ use App\Models\prelevement;
 // use App\Models\historiquecaisse;
 use App\Models\rdvpatient;
 
-// getStatFacDay getWeeklyConsultations getWeeklyDashbord
+// getStatFacDay getWeeklyConsultations getWeeklyDashbord statistique_reception statistique_reception_cons getWeeklyDashbord getStatFacDay
 
 
 class ApistatController extends Controller

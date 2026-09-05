@@ -25,7 +25,7 @@ class ApihistoriqueController extends Controller
         // 1. RÉSUMÉ DE CAISSE
         //    0 = Ouverture
         //    1 = Opérations journalières
-        //    2 = Fermeture
+        //    2 = Fermeture historique_caisse
         // ==========================================================
 
         $resumes = DB::table('caisse_resume')

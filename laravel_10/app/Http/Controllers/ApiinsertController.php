@@ -55,6 +55,8 @@ use App\Models\depotfacture;
 // use App\Models\historiquecaisse type_garantie_new ope_caisse_new;
 use App\Models\portecaisse;
 
+// caisse_ouvert
+
 class ApiinsertController extends Controller
 {
 

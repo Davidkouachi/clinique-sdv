@@ -169,13 +169,15 @@ $(document).ready(function () {
             // Tableau dynamique pour les détails des soins infirmiers
             doc.autoTable({
                 startY: yPossT,
-                head: [['N°', 'Type', 'Examen', 'Montant', 'Prélevement', 'Prise en charge ?']],
+                head: [['N°', 'Type', 'Examen', 'Montant', 'Part assurance', 'Part patient', 'Prélevement', 'Prise en charge ?']],
                 body: donneeTables.map((item, index) => [
                     index + 1,
                     item.code === 'B' ? 'ANALYSE' : 'IMAGERIE',  
                     item.examen,
-                    formatPriceT(item.montant) + ' Fcfa',
-                    formatPriceT(item.prelevement) + ' Fcfa',
+                    formatPriceT(item.montant ?? 0) + ' Fcfa',
+                    formatPriceT(item.part_assurance ?? 0) + ' Fcfa',
+                    formatPriceT(item.part_patient ?? 0) + ' Fcfa',
+                    formatPriceT(item.prelevement ?? 0) + ' Fcfa',
                     parseInt(item.assurance) === 0 ? 'Non' : 'Oui',
                 ]),
                 foot: [[
@@ -183,7 +185,7 @@ $(document).ready(function () {
                     { content: formatPriceT(facture.montant_total) + " Fcfa", styles: { fontStyle: 'bold' } },
                 ]],
 
-                ...configTable([235, 99, 37])
+                ...configTable([235, 99, 37], 7)
             });
 
             yPoss = doc.autoTable.previous.finalY || yPossT + 10;

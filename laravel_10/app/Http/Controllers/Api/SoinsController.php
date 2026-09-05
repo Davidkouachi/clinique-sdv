@@ -324,6 +324,10 @@ class SoinsController extends Controller
 
 	                'total',
 
+	                'part_assurance',
+
+	                'part_patient',
+
 	                'assure',
 
 	            ])
@@ -352,6 +356,10 @@ class SoinsController extends Controller
 	                'qte',
 
 	                'total',
+
+	                'part_assurance',
+
+	                'part_patient',
 
 	                'assure',
 
@@ -451,640 +459,664 @@ class SoinsController extends Controller
 	    }
 	}
 
-public function create(Request $request)
-{
-    $selectionsSoins = $request->input('selectionsSoins');
-    $selectionsProduits = $request->input('selectionsProduits');
+	public function create(Request $request)
+	{
+	    $selectionsSoins = $request->input('selectionsSoins');
+	    $selectionsProduits = $request->input('selectionsProduits');
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Vérification des sélections
-    |--------------------------------------------------------------------------
-    */
-
-    if (
-        (!is_array($selectionsSoins) || empty($selectionsSoins)) &&
-        (!is_array($selectionsProduits) || empty($selectionsProduits))
-    ) {
-        return response()->json([
-            'json' => true
-        ]);
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Vérification hospitalisation
-    |--------------------------------------------------------------------------
-    */
-
-    if ($request->numhosp !== null) {
-
-        $verf = DB::table('admission')
-            ->where('numhospit', $request->numhosp)
-            ->first();
-
-        if (!$verf) {
-
-            return response()->json([
-                'num_hosp_introuvable' => true
-            ]);
-        }
-
-        if ($verf->statut === 'sortie') {
-
-            return response()->json([
-                'num_hosp_liberer' => true
-            ]);
-        }
-
-        if (
-            $verf->idenregistremetpatient !=
-            $request->patient_id
-        ) {
-
-            return response()->json([
-                'matricule_hosp_error' => true
-            ]);
-        }
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Informations assurance du patient
-    |--------------------------------------------------------------------------
-    */
-
-    $patient = DB::table('patient')
-        ->where(
-            'idenregistremetpatient',
-            $request->patient_id
-        )
-        ->select(
-            'codeassurance',
-            'codesocieteassure'
-        )
-        ->first();
+
+	    /*
+	    |--------------------------------------------------------------------------
+	    | Vérification des sélections
+	    |--------------------------------------------------------------------------
+	    */
+
+	    if (
+	        (!is_array($selectionsSoins) || empty($selectionsSoins)) &&
+	        (!is_array($selectionsProduits) || empty($selectionsProduits))
+	    ) {
+	        return response()->json([
+	            'json' => true
+	        ]);
+	    }
+
+
+	    /*
+	    |--------------------------------------------------------------------------
+	    | Vérification hospitalisation
+	    |--------------------------------------------------------------------------
+	    */
+
+	    if ($request->numhosp !== null) {
+
+	        $verf = DB::table('admission')
+	            ->where('numhospit', $request->numhosp)
+	            ->first();
+
+	        if (!$verf) {
+
+	            return response()->json([
+	                'num_hosp_introuvable' => true
+	            ]);
+	        }
+
+	        if ($verf->statut === 'sortie') {
+
+	            return response()->json([
+	                'num_hosp_liberer' => true
+	            ]);
+	        }
+
+	        if (
+	            $verf->idenregistremetpatient !=
+	            $request->patient_id
+	        ) {
+
+	            return response()->json([
+	                'matricule_hosp_error' => true
+	            ]);
+	        }
+	    }
+
+
+	    /*
+	    |--------------------------------------------------------------------------
+	    | Informations assurance du patient
+	    |--------------------------------------------------------------------------
+	    */
+
+	    $patient = DB::table('patient')
+	        ->where(
+	            'idenregistremetpatient',
+	            $request->patient_id
+	        )
+	        ->select(
+	            'codeassurance',
+	            'codesocieteassure'
+	        )
+	        ->first();
 
-    if (!$patient) {
+	    if (!$patient) {
 
-        return response()->json([
-            'patient_introuvable' => true
-        ]);
-    }
+	        return response()->json([
+	            'patient_introuvable' => true
+	        ]);
+	    }
 
 
-    DB::beginTransaction();
+	    DB::beginTransaction();
 
-    try {
+	    try {
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Numéro facture
-        |--------------------------------------------------------------------------
-        */
+	        /*
+	        |--------------------------------------------------------------------------
+	        | Numéro facture
+	        |--------------------------------------------------------------------------
+	        */
 
-        $numFacture = $this->matriculeService->generate(
-            table: 'soins_medicaux',
-            column: 'numfac_soins',
-            prefix: 'FCS',
-            length: 6
-        );
+	        $numFacture = $this->matriculeService->generate(
+	            table: 'soins_medicaux',
+	            column: 'numfac_soins',
+	            prefix: 'FCS',
+	            length: 6
+	        );
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Montants
-        |--------------------------------------------------------------------------
-        */
+	        /*
+	        |--------------------------------------------------------------------------
+	        | Montants
+	        |--------------------------------------------------------------------------
+	        */
 
-        $montantTotal = (int) str_replace(
-            '.',
-            '',
-            $request->montantT ?? 0
-        );
+	        $montantTotal = (int) str_replace(
+	            '.',
+	            '',
+	            $request->montantT ?? 0
+	        );
 
-        $montantPatient = (int) str_replace(
-            '.',
-            '',
-            $request->montantP ?? 0
-        );
+	        $montantPatient = (int) str_replace(
+	            '.',
+	            '',
+	            $request->montantP ?? 0
+	        );
 
-        $montantAssurance = (int) str_replace(
-            '.',
-            '',
-            $request->montantA ?? 0
-        );
+	        $montantAssurance = (int) str_replace(
+	            '.',
+	            '',
+	            $request->montantA ?? 0
+	        );
 
-        $remise = (int) str_replace(
-            '.',
-            '',
-            $request->remise ?? 0
-        );
+	        $remise = (int) str_replace(
+	            '.',
+	            '',
+	            $request->remise ?? 0
+	        );
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Création des soins
-        |--------------------------------------------------------------------------
-        */
+	        /*
+	        |--------------------------------------------------------------------------
+	        | Création des soins
+	        |--------------------------------------------------------------------------
+	        */
 
-        $soinsId = DB::table('soins_medicaux')
-            ->insertGetId([
+	        $soinsId = DB::table('soins_medicaux')
+	            ->insertGetId([
 
-                'idenregistremetpatient' =>
-                    $request->patient_id,
+	                'idenregistremetpatient' =>
+	                    $request->patient_id,
 
-                'codeassurance' =>
-                    $patient->codeassurance,
+	                'codeassurance' =>
+	                    $patient->codeassurance,
 
-                'codesocieteassure' =>
-                    $patient->codesocieteassure,
+	                'codesocieteassure' =>
+	                    $patient->codesocieteassure,
 
-                'numfac_soins' =>
-                    $numFacture,
+	                'numfac_soins' =>
+	                    $numFacture,
 
-                'medecin' =>
-                    $request->medecin,
+	                'medecin' =>
+	                    $request->medecin,
 
-                'montant_total' =>
-                    $montantTotal,
+	                'montant_total' =>
+	                    $montantTotal,
 
-                'ticket_moderateur' =>
-                    $montantPatient,
+	                'ticket_moderateur' =>
+	                    $montantPatient,
 
-                'part_assurance' =>
-                    $montantAssurance,
+	                'part_assurance' =>
+	                    $montantAssurance,
 
-                'taux_couverture' =>
-                    $request->taux ?? 0,
+	                'taux_couverture' =>
+	                    $request->taux ?? 0,
 
-                'numbon' =>
-                    $request->numcode,
+	                'numbon' =>
+	                    $request->numcode,
 
-                'numhospit' =>
-                    $request->numhosp,
+	                'numhospit' =>
+	                    $request->numhosp,
 
-                'renseignement_clinique' =>
-                    $request->rensg,
+	                'renseignement_clinique' =>
+	                    $request->rensg,
 
-                'created_at' =>
-                    now(),
+	                'date_soin' =>
+	                    now(),
 
-                'updated_at' =>
-                    now(),
-            ]);
+	                'updated_at' =>
+	                    now(),
+	            ]);
 
 
-        if (!$soinsId) {
+	        if (!$soinsId) {
 
-            throw new \Exception(
-                'Erreur lors de la création des soins.'
-            );
-        }
+	            throw new \Exception(
+	                'Erreur lors de la création des soins.'
+	            );
+	        }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Détails des soins
-        |--------------------------------------------------------------------------
-        */
+	        /*
+	        |--------------------------------------------------------------------------
+	        | Détails des soins
+	        |--------------------------------------------------------------------------
+	        */
 
-        if (is_array($selectionsSoins)) {
+	        if (is_array($selectionsSoins)) {
 
-            foreach ($selectionsSoins as $value) {
+	            foreach ($selectionsSoins as $value) {
 
-                $prix = (int) str_replace(
-                    '.',
-                    '',
-                    $value['prix'] ?? 0
-                );
+	                $prix = (int) str_replace(
+	                    '.',
+	                    '',
+	                    $value['prix'] ?? 0
+	                );
 
-                $quantite = max(
-                    1,
-                    (int) ($value['quantite'] ?? 1)
-                );
+	                $quantite = max(
+	                    1,
+	                    (int) ($value['quantite'] ?? 1)
+	                );
 
-                $montant = (int) str_replace(
-                    '.',
-                    '',
-                    $value['montant'] ?? ($prix * $quantite)
-                );
+	                $montant = (int) str_replace(
+	                    '.',
+	                    '',
+	                    $value['montant'] ?? ($prix * $quantite)
+	                );
 
+	                $montantAssurance = (int) str_replace(
+	                    '.',
+	                    '',
+	                    $value['montant_assurance'] ?? 0
+	                );
 
-                $detailInsert =
-                    DB::table('soins_medicaux_itemsoins')
-                        ->insert([
+	                $montantPatient = (int) str_replace(
+	                    '.',
+	                    '',
+	                    $value['montant_patient'] ?? 0
+	                );
 
-                            'id_soins' =>
-                                $soinsId,
 
-                            'code_soins' =>
-                                $value['id'] ?? null,
+	                $detailInsert =
+	                    DB::table('soins_medicaux_itemsoins')
+	                        ->insert([
 
-                            'libelle_soins' =>
-                                $value['soins'] ?? '',
+	                            'id_soins' =>
+	                                $soinsId,
 
-                            'price' =>
-                                $prix,
+	                            'code_soins' =>
+	                                $value['id'] ?? null,
 
-                            'qte' =>
-                                $quantite,
+	                            'libelle_soins' =>
+	                                strtoupper($value['soins'] ?? ''),
 
-                            'total' =>
-                                $montant,
+	                            'price' =>
+	                                $prix,
 
-                            'assure' =>
-                                ($value['assurance'] ?? 'non') === 'oui',
+	                            'qte' =>
+	                                $quantite,
 
-                            'created_at' =>
-                                now(),
+	                            'total' =>
+	                                $montant,
 
-                            'updated_at' =>
-                                now(),
-                        ]);
+	                            'part_assurance' =>
+	                                $montantAssurance,
 
+	                            'part_patient' =>
+	                                $montantPatient,
 
-                if ($detailInsert === 0) {
+	                            'assure' =>
+	                                ($value['assurance'] ?? 'non') === 'oui',
 
-                    throw new \Exception(
-                        'Erreur lors de l\'insertion du détail soin.'
-                    );
-                }
-            }
-        }
+	                            'created_at' =>
+	                                now(),
 
+	                            'updated_at' =>
+	                                now(),
+	                        ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Détails des produits
-        |--------------------------------------------------------------------------
-        */
 
-        if (is_array($selectionsProduits)) {
+	                if ($detailInsert === 0) {
 
-            foreach ($selectionsProduits as $value) {
+	                    throw new \Exception(
+	                        'Erreur lors de l\'insertion du détail soin.'
+	                    );
+	                }
+	            }
+	        }
 
-                $prix = (int) str_replace(
-                    '.',
-                    '',
-                    $value['prix'] ?? 0
-                );
 
-                $quantite = max(
-                    1,
-                    (int) ($value['quantite'] ?? 1)
-                );
+	        /*
+	        |--------------------------------------------------------------------------
+	        | Détails des produits
+	        |--------------------------------------------------------------------------
+	        */
 
-                $montant = (int) str_replace(
-                    '.',
-                    '',
-                    $value['montant'] ?? ($prix * $quantite)
-                );
+	        if (is_array($selectionsProduits)) {
 
-                $montantAssuranceProduit =
-                    (int) str_replace(
-                        '.',
-                        '',
-                        $value['montant_assurance'] ?? 0
-                    );
+	            foreach ($selectionsProduits as $value) {
 
-                $montantPatientProduit =
-                    (int) str_replace(
-                        '.',
-                        '',
-                        $value['montant_patient'] ?? $montant
-                    );
+	                $prix = (int) str_replace(
+	                    '.',
+	                    '',
+	                    $value['prix'] ?? 0
+	                );
 
+	                $quantite = max(
+	                    1,
+	                    (int) ($value['quantite'] ?? 1)
+	                );
 
-                $detailInsert =
-                    DB::table('soins_medicaux_itemmedics')
-                        ->insert([
+	                $montant = (int) str_replace(
+	                    '.',
+	                    '',
+	                    $value['montant'] ?? ($prix * $quantite)
+	                );
 
-                            'id_soins' =>
-                                $soinsId,
+	                $montantAssuranceProduit =
+	                    (int) str_replace(
+	                        '.',
+	                        '',
+	                        $value['montant_assurance'] ?? 0
+	                    );
 
-                            'medicine_id' =>
-                                $value['medicine_id'] ?? null,
+	                $montantPatientProduit =
+	                    (int) str_replace(
+	                        '.',
+	                        '',
+	                        $value['montant_patient'] ?? $montant
+	                    );
 
-                            'name' =>
-                                $value['produit'] ?? '',
 
-                            'price' =>
-                                $prix,
+	                $detailInsert =
+	                    DB::table('soins_medicaux_itemmedics')
+	                        ->insert([
 
-                            'qte' =>
-                                $quantite,
+	                            'id_soins' =>
+	                                $soinsId,
 
-                            'total' =>
-                                $montant,
+	                            'medicine_id' =>
+	                                $value['medicine_id'] ?? null,
 
-                            'assure' =>
-                                ($value['assurance'] ?? 'non') === 'oui',
+	                            'name' =>
+	                                strtoupper($value['produit'] ?? ''),
 
-                            'created_at' =>
-                                now(),
+	                            'price' =>
+	                                $prix,
 
-                            'updated_at' =>
-                                now(),
-                        ]);
+	                            'qte' =>
+	                                $quantite,
 
+	                            'total' =>
+	                                $montant,
 
-                if ($detailInsert === 0) {
+	                            'part_assurance' =>
+	                                $montantAssurance,
 
-                    throw new \Exception(
-                        'Erreur lors de insertion du produit.'
-                    );
-                }
-            }
-        }
+	                            'part_patient' =>
+	                                $montantPatient,
 
+	                            'assure' =>
+	                                ($value['assurance'] ?? 'non') === 'oui',
 
-        $facturesInserted = DB::table('factures')
-            ->insert([
+	                            'created_at' =>
+	                                now(),
 
-                'numfac' =>
-                    $numFacture,
+	                            'updated_at' =>
+	                                now(),
+	                        ]);
 
-                'numhospit' =>
-                    $request->numhosp,
 
-                'idenregistremetpatient' =>
-                    $request->patient_id,
+	                if ($detailInsert === 0) {
 
-                'montanttotal' =>
-                    $montantTotal,
+	                    throw new \Exception(
+	                        'Erreur lors de insertion du produit.'
+	                    );
+	                }
+	            }
+	        }
 
-                'remise' =>
-                    $remise,
 
-                'type_remise' =>
-                    0,
+	        $facturesInserted = DB::table('factures')
+	            ->insert([
 
-                'calcul_applique' =>
-                    0,
+	                'numfac' =>
+	                    $numFacture,
 
-                'taux_applique' =>
-                    $request->taux ?? 0,
+	                'numhospit' =>
+	                    $request->numhosp,
 
-                'montant_ass' =>
-                    $montantAssurance,
+	                'idenregistremetpatient' =>
+	                    $request->patient_id,
 
-                'montant_pat' =>
-                    $montantPatient,
+	                'montanttotal' =>
+	                    $montantTotal,
 
-                'montantregle_ass' =>
-                    0,
+	                'remise' =>
+	                    $remise,
 
-                'montantregle_pat' =>
-                    0,
+	                'type_remise' =>
+	                    0,
 
-                'montantpat_verser' =>
-                    0,
+	                'calcul_applique' =>
+	                    0,
 
-                'montantpat_remis' =>
-                    0,
+	                'taux_applique' =>
+	                    $request->taux ?? 0,
 
-                'montantreste_ass' =>
-                    $montantAssurance,
+	                'montant_ass' =>
+	                    $montantAssurance,
 
-                'montantreste_pat' =>
-                    $montantPatient,
+	                'montant_pat' =>
+	                    $montantPatient,
 
-                'solde_ass' =>
-                    0,
+	                'montantregle_ass' =>
+	                    0,
 
-                'solde_pat' =>
-                    0,
+	                'montantregle_pat' =>
+	                    0,
 
-                'codeassurance' =>
-                    $patient->codeassurance,
+	                'montantpat_verser' =>
+	                    0,
 
-                'datefacture' =>
-                    now(),
+	                'montantpat_remis' =>
+	                    0,
 
-                'type_facture' =>
-                    5,
+	                'montantreste_ass' =>
+	                    $montantAssurance,
 
-                'timbre_fiscal' =>
-                    0,
+	                'montantreste_pat' =>
+	                    $montantPatient,
 
-                'a_encaisser' =>
-                    0,
+	                'solde_ass' =>
+	                    0,
 
-                'datereglt_pat' =>
-                    null,
+	                'solde_pat' =>
+	                    0,
 
-                'numrecu' =>
-                    null,
-            ]);
+	                'codeassurance' =>
+	                    $patient->codeassurance,
 
+	                'datefacture' =>
+	                    now(),
 
-        if ($facturesInserted === 0) {
+	                'type_facture' =>
+	                    5,
 
-            throw new \Exception(
-                'Erreur lors de l\'insertion dans la table factures.'
-            );
-        }
+	                'timbre_fiscal' =>
+	                    0,
 
+	                'a_encaisser' =>
+	                    0,
 
-        /*
-        |--------------------------------------------------------------------------
-        | Facturation hospitalisation
-        |--------------------------------------------------------------------------
-        */
+	                'datereglt_pat' =>
+	                    null,
 
-        if ($request->numhosp !== null) {
+	                'numrecu' =>
+	                    null,
+	            ]);
 
-            $facHosInsert =
-                DB::table('facturation_hospit')
-                    ->insert([
 
-                        'numpchr' =>
-                            $request->numhosp,
+	        if ($facturesInserted === 0) {
 
-                        'numfac' =>
-                            $numFacture,
+	            throw new \Exception(
+	                'Erreur lors de l\'insertion dans la table factures.'
+	            );
+	        }
 
-                        /*
-                         * Type à adapter selon ton référentiel.
-                         * Ici 5 = soins médicaux.
-                         */
-                        'idgarhospit' =>
-                            5,
 
-                        'qte' =>
-                            1,
+	        /*
+	        |--------------------------------------------------------------------------
+	        | Facturation hospitalisation
+	        |--------------------------------------------------------------------------
+	        */
 
-                        'pu' =>
-                            $montantTotal,
+	        if ($request->numhosp !== null) {
 
-                        'montgaran' =>
-                            $montantTotal,
+	            $facHosInsert =
+	                DB::table('facturation_hospit')
+	                    ->insert([
 
-                        'montextra' =>
-                            0,
+	                        'numpchr' =>
+	                            $request->numhosp,
 
-                        'montaccorde' =>
-                            $montantAssurance,
+	                        'numfac' =>
+	                            $numFacture,
 
-                        'montrefus' =>
-                            $montantPatient,
+	                        /*
+	                         * Type à adapter selon ton référentiel.
+	                         * Ici 5 = soins médicaux.
+	                         */
+	                        'idgarhospit' =>
+	                            5,
 
-                        'traiter' =>
-                            0,
-                    ]);
+	                        'qte' =>
+	                            1,
 
+	                        'pu' =>
+	                            $montantTotal,
 
-            if ($facHosInsert === 0) {
+	                        'montgaran' =>
+	                            $montantTotal,
 
-                throw new \Exception(
-                    'Erreur lors de l\'insertion dans la table facturation_hospit.'
-                );
-            }
+	                        'montextra' =>
+	                            0,
 
+	                        'montaccorde' =>
+	                            $montantAssurance,
 
-            /*
-            |--------------------------------------------------------------------------
-            | Facture principale hospitalisation
-            |--------------------------------------------------------------------------
-            */
+	                        'montrefus' =>
+	                            $montantPatient,
 
-            $factureHosp =
-                DB::table('admission')
-                    ->join(
-                        'factures',
-                        'factures.numfac',
-                        '=',
-                        'admission.numfachospit'
-                    )
-                    ->where(
-                        'admission.numhospit',
-                        $request->numhosp
-                    )
-                    ->select(
-                        'factures.numfac',
-                        'factures.montanttotal',
-                        'factures.montant_ass',
-                        'factures.montant_pat',
-                        'factures.montantreste_ass',
-                        'factures.montantreste_pat'
-                    )
-                    ->first();
+	                        'traiter' =>
+	                            0,
+	                    ]);
 
 
-            if (!$factureHosp) {
+	            if ($facHosInsert === 0) {
 
-                throw new \Exception(
-                    'Facture hospitalisation introuvable.'
-                );
-            }
+	                throw new \Exception(
+	                    'Erreur lors de l\'insertion dans la table facturation_hospit.'
+	                );
+	            }
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | Recalcul hospitalisation
-            |--------------------------------------------------------------------------
-            */
+	            /*
+	            |--------------------------------------------------------------------------
+	            | Facture principale hospitalisation
+	            |--------------------------------------------------------------------------
+	            */
 
-            $totalNew =
-                $montantTotal +
-                (int) $factureHosp->montanttotal;
+	            $factureHosp =
+	                DB::table('admission')
+	                    ->join(
+	                        'factures',
+	                        'factures.numfac',
+	                        '=',
+	                        'admission.numfachospit'
+	                    )
+	                    ->where(
+	                        'admission.numhospit',
+	                        $request->numhosp
+	                    )
+	                    ->select(
+	                        'factures.numfac',
+	                        'factures.montanttotal',
+	                        'factures.montant_ass',
+	                        'factures.montant_pat',
+	                        'factures.montantreste_ass',
+	                        'factures.montantreste_pat'
+	                    )
+	                    ->first();
 
-            $partAssuranceNew =
-                $montantAssurance +
-                (int) $factureHosp->montant_ass;
 
-            $partPatientNew =
-                $montantPatient +
-                (int) $factureHosp->montant_pat;
+	            if (!$factureHosp) {
 
-            $partAssuranceResteNew =
-                $montantAssurance +
-                (int) $factureHosp->montantreste_ass;
+	                throw new \Exception(
+	                    'Facture hospitalisation introuvable.'
+	                );
+	            }
 
-            $partPatientResteNew =
-                $montantPatient +
-                (int) $factureHosp->montantreste_pat;
 
+	            /*
+	            |--------------------------------------------------------------------------
+	            | Recalcul hospitalisation
+	            |--------------------------------------------------------------------------
+	            */
 
-            $factureUpdate =
-                DB::table('factures')
-                    ->where(
-                        'numfac',
-                        $factureHosp->numfac
-                    )
-                    ->update([
+	            $totalNew =
+	                $montantTotal +
+	                (int) $factureHosp->montanttotal;
 
-                        'montanttotal' =>
-                            $totalNew,
+	            $partAssuranceNew =
+	                $montantAssurance +
+	                (int) $factureHosp->montant_ass;
 
-                        'montant_ass' =>
-                            $partAssuranceNew,
+	            $partPatientNew =
+	                $montantPatient +
+	                (int) $factureHosp->montant_pat;
 
-                        'montant_pat' =>
-                            $partPatientNew,
+	            $partAssuranceResteNew =
+	                $montantAssurance +
+	                (int) $factureHosp->montantreste_ass;
 
-                        'montantreste_ass' =>
-                            $partAssuranceResteNew,
+	            $partPatientResteNew =
+	                $montantPatient +
+	                (int) $factureHosp->montantreste_pat;
 
-                        'montantreste_pat' =>
-                            $partPatientResteNew,
 
-                        'updated_at' =>
-                            now(),
-                    ]);
+	            $factureUpdate =
+	                DB::table('factures')
+	                    ->where(
+	                        'numfac',
+	                        $factureHosp->numfac
+	                    )
+	                    ->update([
 
+	                        'montanttotal' =>
+	                            $totalNew,
 
-            if ($factureUpdate === 0) {
+	                        'montant_ass' =>
+	                            $partAssuranceNew,
 
-                throw new \Exception(
-                    'Erreur lors de la mise à jour de la facture hospitalisation.'
-                );
-            }
-        }
+	                        'montant_pat' =>
+	                            $partPatientNew,
 
+	                        'montantreste_ass' =>
+	                            $partAssuranceResteNew,
 
-        /*
-        |--------------------------------------------------------------------------
-        | Validation finale
-        |--------------------------------------------------------------------------
-        */
+	                        'montantreste_pat' =>
+	                            $partPatientResteNew,
 
-        DB::commit();
+	                        'updated_at' =>
+	                            now(),
+	                    ]);
 
 
-        return response()->json([
+	            if ($factureUpdate === 0) {
 
-            'success' =>
-                true,
+	                throw new \Exception(
+	                    'Erreur lors de la mise à jour de la facture hospitalisation.'
+	                );
+	            }
+	        }
 
-            'soins_id' =>
-                $soinsId,
 
-            'numfac' =>
-                $numFacture,
+	        /*
+	        |--------------------------------------------------------------------------
+	        | Validation finale
+	        |--------------------------------------------------------------------------
+	        */
 
-        ]);
+	        DB::commit();
 
 
-    } catch (\Throwable $e) {
+	        return response()->json([
 
-        DB::rollBack();
+	            'success' =>
+	                true,
 
-        return response()->json([
+	            'soins_id' =>
+	                $soinsId,
 
-            'error' =>
-                true,
+	            'numfac' =>
+	                $numFacture,
 
-            'message' =>
-                $e->getMessage(),
+	        ]);
 
-        ], 500);
-    }
-}
+
+	    } catch (\Throwable $e) {
+
+	        DB::rollBack();
+
+	        return response()->json([
+
+	            'error' =>
+	                true,
+
+	            'message' =>
+	                $e->getMessage(),
+
+	        ], 500);
+	    }
+	}
 
 }

@@ -43,7 +43,6 @@ class RechController extends Controller
             ->leftJoin('tauxcouvertureassure', 'patient.idtauxcouv', '=', 'tauxcouvertureassure.idtauxcouv')
             ->leftJoin('assurance', 'patient.codeassurance', '=', 'assurance.codeassurance')
             ->leftJoin('filiation', 'patient.codefiliation', '=', 'filiation.codefiliation')
-            ->leftJoin('dossierpatient', 'patient.idenregistremetpatient', '=', 'dossierpatient.idenregistremetpatient')
             ->where('patient.idenregistremetpatient', '=', $request->id)
             ->select(
                 'patient.*', 
@@ -51,7 +50,6 @@ class RechController extends Controller
                 'assurance.libelleassurance as assurance',
                 'tauxcouvertureassure.valeurtaux as taux',
                 'filiation.libellefiliation as filiation',
-                'dossierpatient.numdossier as numdossier',
             )
             ->first();
 
